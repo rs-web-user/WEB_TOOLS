@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iframe埋め込みテスト</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            background-color: gray;
+        }
+        iframe {
+            width: 80%;
+            height: 600px;
+            border: none;
+        }
+        .content {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+        iframe埋め込みテスト
+        </div>
+        <iframe src="https://funding.fundi.co.jp/fund_list" title="ローカルiframeテスト"></iframe>
+    </div>
+</body>
+</html>

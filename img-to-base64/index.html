@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <input type="file" id="imageFile" style="margin-bottom: 50px;">
+    <br>
+    <img id="preview" style="max-width: 900px;">
+    <br>
+    <button id="copyButton">base64をコピー</button>
+    <p id="base64" style="width: 900px; overflow-wrap: break-word;"></p>
+
+    <script>
+        document.getElementById('imageFile').addEventListener('change', function () {
+                var file = this.files[0];
+                var reader = new FileReader();
+                reader.onloadend = function () {
+                    var base64Text = reader.result;
+                    document.getElementById('base64').innerText = base64Text;
+                    // プレビューを表示
+                    document.getElementById('preview').src = base64Text;
+                }
+                reader.readAsDataURL(file);
+            });
+
+        document.getElementById('copyButton').addEventListener('click', function () {
+            var base64Text = document.getElementById('base64').innerText;
+            navigator.clipboard.writeText(base64Text).then(function () {
+                console.log('Copying to clipboard was successful!');
+            }, function (err) {
+                console.error('Could not copy text: ', err);
+            });
+        });
+    </script>
+</body>
+
+</html>
