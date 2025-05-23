@@ -1,46 +1,47 @@
 <!DOCTYPE html>
 <html lang="ja">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>パスワード生成ツール</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="container">
-        <h1>パスワード生成ツール</h1>
-        <div class="options">
-            <label><input type="checkbox" id="upper" checked /> 英大文字</label>
-            <label><input type="checkbox" id="lower" checked /> 英小文字</label>
-            <label><input type="checkbox" id="number" checked /> 数字</label>
-            <label><input type="checkbox" id="symbol" checked /> 記号</label>
-            <label><input type="checkbox" id="noSymbol" /> 記号なし</label>
-        </div>
-        <label>文字数:
-            <input type="number" id="length" min="4" max="32" value="32" />
-            <button type="button" class="num-btn minus" onclick="changeLength(-1)">
-                －
-            </button>
-            <button type="button" class="num-btn plus" onclick="changeLength(1)">
-                ＋
-            </button>
-        </label>
-        <label>生成個数:
-            <input type="number" id="count" min="1" max="20" value="20" />
-            <button type="button" class="num-btn minus" onclick="changeCount(-1)">
-                －
-            </button>
-            <button type="button" class="num-btn plus" onclick="changeCount(1)">
-                ＋
-            </button>
-        </label>
-        <button onclick="generatePasswords()">生成</button>
-        <div id="error" class="error"></div>
-        <div class="result" id="result"></div>
+      <h1>パスワード生成ツール</h1>
+      <div class="options">
+        <label><input type="checkbox" id="upper" checked /> 英大文字</label>
+        <label><input type="checkbox" id="lower" checked /> 英小文字</label>
+        <label><input type="checkbox" id="number" checked /> 数字</label>
+        <label><input type="checkbox" id="symbol" checked /> 記号</label>
+        <label><input type="checkbox" id="noSymbol" /> 記号なし</label>
+      </div>
+      <label
+        >文字数:
+        <input type="number" id="length" min="4" max="32" value="32" />
+        <button type="button" class="num-btn minus" onclick="changeLength(-1)">
+          －
+        </button>
+        <button type="button" class="num-btn plus" onclick="changeLength(1)">
+          ＋
+        </button>
+      </label>
+      <label
+        >生成個数:
+        <input type="number" id="count" min="1" max="20" value="20" />
+        <button type="button" class="num-btn minus" onclick="changeCount(-1)">
+          －
+        </button>
+        <button type="button" class="num-btn plus" onclick="changeCount(1)">
+          ＋
+        </button>
+      </label>
+      <button onclick="generatePasswords()">生成</button>
+      <div id="error" class="error"></div>
+      <div class="result" id="result"></div>
     </div>
-</body>
-<script>
+  </body>
+  <script>
     // 似通った文字を除外
     const upper = "ABCDEFGHJKLMNPQRTUVWXY"; // O, I, S, Z 除外
     const lower = "abcdefghjkmnpqrtuvwxy"; // o, l, i, s, z 除外
@@ -48,242 +49,240 @@
     const symbol = "!@#$%^&*()-_=+[]{};:,.<>?";
 
     function getCharset(opts) {
-        let chars = "";
-        if (opts.upper) chars += upper;
-        if (opts.lower) chars += lower;
-        if (opts.number) chars += number;
-        // 記号の頻度を下げるため、他の文字種の1/3の回数だけ追加
-        if (opts.symbol && !opts.noSymbol) chars += symbol.repeat(0.33);
-        return chars;
+      let chars = "";
+      if (opts.upper) chars += upper;
+      if (opts.lower) chars += lower;
+      if (opts.number) chars += number;
+      // 記号の頻度を下げるため、他の文字種の1/3の回数だけ追加
+      if (opts.symbol && !opts.noSymbol) chars += symbol.repeat(0.33);
+      return chars;
     }
 
     function generatePasswords() {
-        const opts = {
-            upper: document.getElementById("upper").checked,
-            lower: document.getElementById("lower").checked,
-            number: document.getElementById("number").checked,
-            symbol: document.getElementById("symbol").checked,
-            noSymbol: document.getElementById("noSymbol").checked,
-        };
-        if (opts.noSymbol) opts.symbol = false;
-        const length = parseInt(document.getElementById("length").value, 10);
-        const count = parseInt(document.getElementById("count").value, 10);
-        const errorDiv = document.getElementById("error");
-        errorDiv.textContent = "";
-        const charset = getCharset(opts);
-        // 記号の頻度をさらに下げるため、記号が含まれている場合は
-        // 記号は1回、他の文字種は5回繰り返してfinalCharsetを作成
-        let finalCharset = charset;
-        if (opts.symbol && !opts.noSymbol) {
-            let base = "";
-            if (opts.upper) base += upper.repeat(5);
-            if (opts.lower) base += lower.repeat(5);
-            if (opts.number) base += number.repeat(5);
-            base += symbol;
-            finalCharset = base;
-        }
-        if (!charset) {
-            errorDiv.textContent = "1つ以上の文字種を選択してください。";
-            document.getElementById("result").innerHTML = "";
-            return;
-        }
-        if (length < 4 || length > 32) {
-            errorDiv.textContent = "文字数は4～32の範囲で指定してください。";
-            document.getElementById("result").innerHTML = "";
-            return;
-        }
-        if (count < 1 || count > 20) {
-            errorDiv.textContent = "生成個数は1～20の範囲で指定してください。";
-            document.getElementById("result").innerHTML = "";
-            return;
-        }
-        if (length <= 8 && charset.length < length) {
-            errorDiv.textContent =
-                "8文字以下の場合、選択した文字種の種類が少なすぎます。";
-            document.getElementById("result").innerHTML = "";
-            return;
-        }
-        const pwList = [];
-        for (let i = 0; i < count; i++) {
-            let pw = "";
-            let used = new Set();
-            let tries = 0;
-            while (pw.length < length && tries < 100) {
-                const c =
-                    finalCharset[Math.floor(Math.random() * finalCharset.length)];
-                if (length <= 8) {
-                    if (used.has(c)) {
-                        tries++;
-                        continue;
-                    }
-                    used.add(c);
-                }
-                pw += c;
+      const opts = {
+        upper: document.getElementById("upper").checked,
+        lower: document.getElementById("lower").checked,
+        number: document.getElementById("number").checked,
+        symbol: document.getElementById("symbol").checked,
+        noSymbol: document.getElementById("noSymbol").checked,
+      };
+      if (opts.noSymbol) opts.symbol = false;
+      const length = parseInt(document.getElementById("length").value, 10);
+      const count = parseInt(document.getElementById("count").value, 10);
+      const errorDiv = document.getElementById("error");
+      errorDiv.textContent = "";
+      const charset = getCharset(opts);
+      // 記号の頻度をさらに下げるため、記号が含まれている場合は
+      // 記号は1回、他の文字種は5回繰り返してfinalCharsetを作成
+      let finalCharset = charset;
+      if (opts.symbol && !opts.noSymbol) {
+        let base = "";
+        if (opts.upper) base += upper.repeat(5);
+        if (opts.lower) base += lower.repeat(5);
+        if (opts.number) base += number.repeat(5);
+        base += symbol;
+        finalCharset = base;
+      }
+      if (!charset) {
+        errorDiv.textContent = "1つ以上の文字種を選択してください。";
+        document.getElementById("result").innerHTML = "";
+        return;
+      }
+      if (length < 4 || length > 32) {
+        errorDiv.textContent = "文字数は4～32の範囲で指定してください。";
+        document.getElementById("result").innerHTML = "";
+        return;
+      }
+      if (count < 1 || count > 20) {
+        errorDiv.textContent = "生成個数は1～20の範囲で指定してください。";
+        document.getElementById("result").innerHTML = "";
+        return;
+      }
+      if (length <= 8 && charset.length < length) {
+        errorDiv.textContent =
+          "8文字以下の場合、選択した文字種の種類が少なすぎます。";
+        document.getElementById("result").innerHTML = "";
+        return;
+      }
+      const pwList = [];
+      for (let i = 0; i < count; i++) {
+        let pw = "";
+        let used = new Set();
+        let tries = 0;
+        while (pw.length < length && tries < 100) {
+          const c =
+            finalCharset[Math.floor(Math.random() * finalCharset.length)];
+          if (length <= 8) {
+            if (used.has(c)) {
+              tries++;
+              continue;
             }
-            if (pw.length < length) {
-                errorDiv.textContent =
-                    "条件を満たすパスワードが作れません。文字種や長さを見直してください。";
-                document.getElementById("result").innerHTML = "";
-                return;
-            }
-            pwList.push(pw);
+            used.add(c);
+          }
+          pw += c;
         }
-        let html = '<ul class="pw-list">';
-        pwList.forEach((pw) => {
-            html += `<li>${pw}</li>`;
-        });
-        html += "</ul>";
-        document.getElementById("result").innerHTML = html;
+        if (pw.length < length) {
+          errorDiv.textContent =
+            "条件を満たすパスワードが作れません。文字種や長さを見直してください。";
+          document.getElementById("result").innerHTML = "";
+          return;
+        }
+        pwList.push(pw);
+      }
+      let html = '<ul class="pw-list">';
+      pwList.forEach((pw) => {
+        html += `<li>${pw}</li>`;
+      });
+      html += "</ul>";
+      document.getElementById("result").innerHTML = html;
     }
-    // 記号あり・なしの排他制御
     document.getElementById("symbol").addEventListener("change", function () {
-        if (this.checked) document.getElementById("noSymbol").checked = false;
+      if (this.checked) document.getElementById("noSymbol").checked = false;
     });
     document.getElementById("noSymbol").addEventListener("change", function () {
-        if (this.checked) document.getElementById("symbol").checked = false;
+      if (this.checked) document.getElementById("symbol").checked = false;
     });
 
     function changeLength(delta) {
-        const input = document.getElementById("length");
-        let val = parseInt(input.value, 10) || 4;
-        val += delta;
-        if (val < 4) val = 4;
-        if (val > 32) val = 32;
-        input.value = val;
+      const input = document.getElementById("length");
+      let val = parseInt(input.value, 10) || 4;
+      val += delta;
+      if (val < 4) val = 4;
+      if (val > 32) val = 32;
+      input.value = val;
     }
 
     function changeCount(delta) {
-        const input = document.getElementById("count");
-        let val = parseInt(input.value, 10) || 1;
-        val += delta;
-        if (val < 1) val = 1;
-        if (val > 20) val = 20;
-        input.value = val;
+      const input = document.getElementById("count");
+      let val = parseInt(input.value, 10) || 1;
+      val += delta;
+      if (val < 1) val = 1;
+      if (val > 20) val = 20;
+      input.value = val;
     }
-</script>
-<style>
+  </script>
+  <style>
     body {
-        background: #181c20;
-        color: #e0e0e0;
-        font-family: "Segoe UI", "Meiryo", sans-serif;
-        padding: 24px;
+      background: #181c20;
+      color: #e0e0e0;
+      font-family: "Segoe UI", "Meiryo", sans-serif;
+      padding: 24px;
     }
 
     h1 {
-        color: #90caf9;
+      color: #90caf9;
     }
 
     .container {
-        background: #23272b;
-        border-radius: 10px;
-        padding: 24px;
-        max-width: 480px;
-        margin: 0 auto;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+      background: #23272b;
+      border-radius: 10px;
+      padding: 24px;
+      max-width: 480px;
+      margin: 0 auto;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
     }
 
     label {
-        display: block;
-        margin: 12px 0 4px 0;
+      display: block;
+      margin: 12px 0 4px 0;
     }
 
     input[type="number"] {
-        width: 80px;
-        padding: 6px;
-        border-radius: 5px;
-        border: 1px solid #333;
-        background: #202428;
-        color: #e0e0e0;
+      width: 80px;
+      padding: 6px;
+      border-radius: 5px;
+      border: 1px solid #333;
+      background: #202428;
+      color: #e0e0e0;
     }
 
     .options {
-        margin: 10px 0 20px 0;
+      margin: 10px 0 20px 0;
     }
 
     .options label {
-        display: inline-block;
-        margin-right: 16px;
+      display: inline-block;
+      margin-right: 16px;
     }
 
     button {
-        background: linear-gradient(90deg, #23272b 0%, #33373b 100%);
-        color: #90caf9;
-        border: none;
-        border-radius: 6px;
-        padding: 10px 24px;
-        font-size: 1.1em;
-        cursor: pointer;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-        transition: background 0.2s, color 0.2s;
+      background: linear-gradient(90deg, #23272b 0%, #33373b 100%);
+      color: #90caf9;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 24px;
+      font-size: 1.1em;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      transition: background 0.2s, color 0.2s;
     }
 
     button:hover {
-        background: #33373b;
-        color: #fffde7;
+      background: #33373b;
+      color: #fffde7;
     }
 
     .result {
-        margin-top: 24px;
-        background: #202428;
-        border-radius: 8px;
-        padding: 16px;
-        font-size: 1.2em;
-        word-break: break-all;
+      margin-top: 24px;
+      background: #202428;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 1.2em;
+      word-break: break-all;
     }
 
     .pw-list {
-        list-style: decimal inside;
-        padding-left: 0;
+      list-style: decimal inside;
+      padding-left: 0;
     }
 
     .pw-list li {
-        margin-bottom: 6px;
-        font-family: "Consolas", "Menlo", monospace;
-        letter-spacing: 0.05em;
+      margin-bottom: 6px;
+      font-family: "Consolas", "Menlo", monospace;
+      letter-spacing: 0.05em;
     }
 
     .error {
-        color: #ff5252;
-        margin-top: 10px;
+      color: #ff5252;
+      margin-top: 10px;
     }
 
     .num-btn {
-        background: #23272b;
-        color: #fff;
-        border: 1px solid #333;
-        border-radius: 4px;
-        width: 32px;
-        height: 32px;
-        font-size: 1.2em;
-        margin: 0 4px;
-        cursor: pointer;
-        vertical-align: middle;
-        transition: background 0.2s, color 0.2s;
-        padding: 0;
+      background: #23272b;
+      color: #fff;
+      border: 1px solid #333;
+      border-radius: 4px;
+      width: 32px;
+      height: 32px;
+      font-size: 1.2em;
+      margin: 0 4px;
+      cursor: pointer;
+      vertical-align: middle;
+      transition: background 0.2s, color 0.2s;
+      padding: 0;
     }
 
     .num-btn.minus {
-        background: #263238;
-        color: #ff8a65;
-        border-color: #37474f;
+      background: #263238;
+      color: #ff8a65;
+      border-color: #37474f;
     }
 
     .num-btn.plus {
-        background: #263238;
-        color: #81d4fa;
-        border-color: #37474f;
+      background: #263238;
+      color: #81d4fa;
+      border-color: #37474f;
     }
 
     .num-btn:hover {
-        background: #33373b;
-        color: #fffde7;
+      background: #33373b;
+      color: #fffde7;
     }
 
     input[type="number"]::-webkit-outer-spin-button,
     input[type="number"]::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
+      -webkit-appearance: none;
+      margin: 0;
     }
-</style>
-
+  </style>
 </html>

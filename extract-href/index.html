@@ -1,170 +1,181 @@
 <!DOCTYPE html>
 <html lang="ja">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <title>aタグとxlink:hrefの抽出ツール</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <h1>href / xlink:href 抽出ツール</h1>
     <p>HTMLやSVGコードを貼り付けて、「抽出」ボタンを押してください。</p>
-    <textarea id="htmlInput" placeholder="ここにHTMLやSVGコードを貼り付けてください..."></textarea>
+    <textarea
+      id="htmlInput"
+      placeholder="ここにHTMLやSVGコードを貼り付けてください..."
+    ></textarea>
     <br />
     <button onclick="extractLinks()">抽出</button>
     <h2>抽出されたリンク一覧</h2>
     <pre id="output"></pre>
-</body>
-<script>
+  </body>
+  <script>
     function extractLinks() {
-        const input = document.getElementById("htmlInput").value;
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(input, "text/html");
+      const input = document.getElementById("htmlInput").value;
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(input, "text/html");
 
-        const hrefLinks = doc.querySelectorAll("a[href]");
-        const xlinkLinks = doc.querySelectorAll("a[xlink\\:href]");
+      const hrefLinks = doc.querySelectorAll("a[href]");
+      const xlinkLinks = doc.querySelectorAll("a[xlink\\:href]");
 
-        const hrefs = Array.from(hrefLinks).map((el) => el.getAttribute("href"));
-        const xlinks = Array.from(xlinkLinks).map((el) => el.getAttribute("xlink:href"));
+      const hrefs = Array.from(hrefLinks).map((el) => el.getAttribute("href"));
+      const xlinks = Array.from(xlinkLinks).map((el) =>
+        el.getAttribute("xlink:href")
+      );
 
-        const allLinks = [...hrefs, ...xlinks].filter(Boolean);
+      const allLinks = [...hrefs, ...xlinks].filter(Boolean);
 
-        const output = document.getElementById("output");
-        if (allLinks.length > 0) {
-            output.innerHTML = allLinks
-                .map(
-                    (url) =>
-                        `<a href="${url.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')}" target="_blank" rel="noopener noreferrer">${url.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</a>`
-                )
-                .join("<br>");
-        } else {
-            output.textContent = "href または xlink:href が見つかりませんでした。";
-        }
+      const output = document.getElementById("output");
+      if (allLinks.length > 0) {
+        output.innerHTML = allLinks
+          .map(
+            (url) =>
+              `<a href="${url
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(
+                  /"/g,
+                  "&quot;"
+                )}" target="_blank" rel="noopener noreferrer">${url
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")}</a>`
+          )
+          .join("<br>");
+      } else {
+        output.textContent = "href または xlink:href が見つかりませんでした。";
+      }
     }
-</script>
-<style>
+  </script>
+  <style>
     body {
-        font-family: sans-serif;
-        padding: 20px;
-        max-width: 800px;
-        margin: auto;
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
     }
 
     textarea {
-        width: 100%;
-        height: 200px;
-        margin-bottom: 10px;
+      width: 100%;
+      height: 200px;
+      margin-bottom: 10px;
     }
 
     button {
-        padding: 8px 16px;
-        font-size: 16px;
+      padding: 8px 16px;
+      font-size: 16px;
     }
 
     pre {
-        background: #f0f0f0;
-        padding: 10px;
-        white-space: pre-wrap;
-        word-wrap: break-word;
+      background: #f0f0f0;
+      padding: 10px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
 
     body {
-        background: #181c24;
-        color: #e0e6ef;
-        font-family: "Segoe UI", "Meiryo", sans-serif;
-        padding: 32px 0 32px 0;
-        max-width: 700px;
-        margin: auto;
+      background: #181c24;
+      color: #e0e6ef;
+      font-family: "Segoe UI", "Meiryo", sans-serif;
+      padding: 32px 0 32px 0;
+      max-width: 700px;
+      margin: auto;
     }
 
     h1 {
-        color: #7ecfff;
-        margin-bottom: 0.5em;
-        font-size: 2em;
-        letter-spacing: 0.05em;
+      color: #7ecfff;
+      margin-bottom: 0.5em;
+      font-size: 2em;
+      letter-spacing: 0.05em;
     }
 
     h2 {
-        color: #a6bfff;
-        margin-top: 2em;
-        margin-bottom: 0.5em;
-        font-size: 1.2em;
+      color: #a6bfff;
+      margin-top: 2em;
+      margin-bottom: 0.5em;
+      font-size: 1.2em;
     }
 
     p {
-        color: #b0b8c9;
-        margin-bottom: 1.5em;
+      color: #b0b8c9;
+      margin-bottom: 1.5em;
     }
 
     textarea {
-        background: #232936;
-        color: #e0e6ef;
-        border: 1px solid #384157;
-        border-radius: 8px;
-        width: 100%;
-        height: 180px;
-        margin-bottom: 16px;
-        padding: 12px;
-        font-size: 1em;
-        box-shadow: 0 2px 8px #0002;
-        resize: vertical;
-        transition: border 0.2s;
+      background: #232936;
+      color: #e0e6ef;
+      border: 1px solid #384157;
+      border-radius: 8px;
+      width: 100%;
+      height: 180px;
+      margin-bottom: 16px;
+      padding: 12px;
+      font-size: 1em;
+      box-shadow: 0 2px 8px #0002;
+      resize: vertical;
+      transition: border 0.2s;
     }
 
     textarea:focus {
-        border: 1.5px solid #7ecfff;
-        outline: none;
+      border: 1.5px solid #7ecfff;
+      outline: none;
     }
 
     button {
-        background: linear-gradient(90deg, #2b90d9 0%, #1b6ca8 100%);
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        padding: 10px 28px;
-        font-size: 1.1em;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0 2px 8px #0003;
-        margin-bottom: 1.5em;
-        transition: background 0.2s, transform 0.1s;
+      background: linear-gradient(90deg, #2b90d9 0%, #1b6ca8 100%);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 28px;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #0003;
+      margin-bottom: 1.5em;
+      transition: background 0.2s, transform 0.1s;
     }
 
     button:hover {
-        background: linear-gradient(90deg, #3bb3ff 0%, #2179b8 100%);
-        transform: translateY(-2px) scale(1.03);
+      background: linear-gradient(90deg, #3bb3ff 0%, #2179b8 100%);
+      transform: translateY(-2px) scale(1.03);
     }
 
     pre#output {
-        background: #232936;
-        color: #e0e6ef;
-        border-radius: 8px;
-        padding: 16px;
-        font-size: 1em;
-        min-height: 60px;
-        box-shadow: 0 2px 8px #0002;
-        border: 1px solid #384157;
-        width: 100vw;
-        max-width: 1200px;
-        overflow-x: auto;
-        word-break: break-all;
+      background: #232936;
+      color: #e0e6ef;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 1em;
+      min-height: 60px;
+      box-shadow: 0 2px 8px #0002;
+      border: 1px solid #384157;
+      width: 100vw;
+      max-width: 1200px;
+      overflow-x: auto;
+      word-break: break-all;
     }
 
     pre#output a {
-        color: #4ec9ff;
-        text-decoration: underline;
-        font-weight: bold;
-        display: inline-block;
-        margin-bottom: 12px;
-        margin-right: 24px;
-        transition: color 0.2s;
-        word-break: break-all;
+      color: #4ec9ff;
+      text-decoration: underline;
+      font-weight: bold;
+      display: inline-block;
+      margin-bottom: 12px;
+      margin-right: 24px;
+      transition: color 0.2s;
+      word-break: break-all;
     }
 
     pre#output a:hover {
-        color: #ffb454;
-        text-decoration: underline wavy;
+      color: #ffb454;
+      text-decoration: underline wavy;
     }
-</style>
-
+  </style>
 </html>

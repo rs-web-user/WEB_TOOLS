@@ -21,7 +21,7 @@
     function extractUrls() {
       const text = document.getElementById("inputText").value;
       const urlRegex = /(https?:\/\/[^\s]+)/g;
-      const urls = [...new Set(text.match(urlRegex) || [])]; // 重複排除
+      const urls = [...new Set(text.match(urlRegex) || [])];
 
       const resultArea = document.getElementById("resultArea");
       resultArea.innerHTML = "<p>抽出されたURL数: " + urls.length + "</p>";

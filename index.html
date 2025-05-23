@@ -1,93 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WEB_TOOLS</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="container">
-        <ul>
-            <li><a href="/WEB_TOOLS/iframe-test">インラインフレーム表示テスト</a></li>
-            <li><a href="/WEB_TOOLS/img-to-base64">base64変換</a></li>
-            <li><a href="/WEB_TOOLS/extract-href">文章内からhref抽出</a></li>
-            <li><a href="/WEB_TOOLS/get-title">文章内からtitle取得</a></li>
-            <li><a href="/WEB_TOOLS/pw-generator">パスワード生成</a></li>
-        </ul>
+      <ul>
+        <li>
+          <a href="/WEB_TOOLS/iframe-test">インラインフレーム表示テスト</a>
+        </li>
+        <li><a href="/WEB_TOOLS/img-to-base64">base64変換</a></li>
+        <li><a href="/WEB_TOOLS/extract-href">文章内からhref抽出</a></li>
+        <li><a href="/WEB_TOOLS/get-title">文章内からtitle取得</a></li>
+        <li><a href="/WEB_TOOLS/pw-generator">パスワード生成</a></li>
+      </ul>
     </div>
-</body>
-<script>
+  </body>
+  <script>
     (function () {
-        if (localStorage.getItem("a") === "true") {
+      if (localStorage.getItem("a") === "true") {
+        document.body.style.display = "";
+        return;
+      }
+      let a = 0;
+      function b() {
+        const c = prompt("ymd");
+        if (c === "") {
+          a++;
+          if (a < 2) {
+            b();
+          } else {
+            localStorage.setItem("a", "true");
             document.body.style.display = "";
-            return;
+          }
+        } else if (c === null) {
+          b();
+        } else {
+          b();
         }
-        let a = 0;
-        function b() {
-            const c = prompt("ymd");
-            if (c === "") {
-                a++;
-                if (a < 2) {
-                    b();
-                } else {
-                    localStorage.setItem("a", "true");
-                    document.body.style.display = "";
-                }
-            } else if (c === null) {
-                b();
-            } else {
-                b();
-            }
-        }
-        document.body.style.display = "none";
-        b();
+      }
+      document.body.style.display = "none";
+      b();
     })();
-</script>
-<style>
+
+    const hadoukenSequence = ["ArrowDown", "ArrowRight", "p"];
+    let hadoukenIndex = 0;
+    document.addEventListener("keydown", function (e) {
+      if (
+        e.key.toLowerCase() === hadoukenSequence[hadoukenIndex].toLowerCase()
+      ) {
+        hadoukenIndex++;
+        if (hadoukenIndex === hadoukenSequence.length) {
+          triggerHadouken();
+          hadoukenIndex = 0;
+        }
+      } else {
+        hadoukenIndex = 0;
+      }
+    });
+
+    function triggerHadouken() {
+      const effect = document.createElement("div");
+      effect.className = "hadouken-effect";
+      document.body.appendChild(effect);
+      document.body.classList.add("hadouken-shake");
+      setTimeout(() => {
+        document.body.classList.add("hadouken-destroy");
+      }, 1200);
+      setTimeout(() => {
+        effect.remove();
+      }, 3000);
+    }
+  </script>
+  <style>
     body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-        background: #181a1b;
-        color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #181a1b;
+      color: #e0e0e0;
     }
 
     .container {
-        background: #23272a;
-        padding: 32px 48px;
-        border-radius: 12px;
-        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.32);
+      background: #23272a;
+      padding: 32px 48px;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(0, 0, 0, 0.32);
     }
 
     ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
+      list-style: none;
+      padding: 0;
+      margin: 0;
     }
 
     li {
-        margin-bottom: 18px;
+      margin-bottom: 18px;
     }
 
     li:last-child {
-        margin-bottom: 0;
+      margin-bottom: 0;
     }
 
     a {
-        font-size: 20px;
-        color: #90caf9;
-        text-decoration: none;
-        transition: color 0.2s;
+      font-size: 20px;
+      color: #90caf9;
+      text-decoration: none;
+      transition: color 0.2s;
     }
 
     a:hover {
-        color: #42a5f5;
-        text-decoration: underline;
+      color: #42a5f5;
+      text-decoration: underline;
     }
-</style>
 
+    .hadouken-effect {
+      position: fixed;
+      top: 50%;
+      left: -15vw;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(
+        circle at 40% 50%,
+        #42a5f5 60%,
+        #1976d2 100%,
+        transparent 100%
+      );
+      opacity: 0.92;
+      border-radius: 50%;
+      z-index: 9999;
+      pointer-events: none;
+      transform: translateY(-50%) scale(0.8);
+      animation: hadouken-wave-move 1.2s cubic-bezier(0.4, 2, 0.6, 1) forwards;
+      box-shadow: 0 0 60px 30px #42a5f5, 0 0 120px 60px #1976d2;
+    }
+
+    @keyframes hadouken-wave-move {
+      0% {
+        left: -15vw;
+        opacity: 0.2;
+        transform: translateY(-50%) scale(0.5);
+      }
+
+      20% {
+        opacity: 1;
+        transform: translateY(-50%) scale(1.1);
+      }
+
+      80% {
+        left: 80vw;
+        opacity: 1;
+        transform: translateY(-50%) scale(1.1);
+      }
+
+      99.9% {
+        left: 120vw;
+        opacity: 0;
+        transform: translateY(-50%) scale(0.7);
+      }
+
+      100% {
+        left: 120vw;
+        opacity: 0;
+        transform: translateY(-50%) scale(0.7);
+        display: none;
+      }
+    }
+
+    .hadouken-shake {
+      animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) 2;
+    }
+
+    @keyframes shake {
+      0% {
+        transform: translate(0, 0);
+      }
+
+      10%,
+      30%,
+      50%,
+      70%,
+      90% {
+        transform: translate(-10px, 5px);
+      }
+
+      20%,
+      40%,
+      60%,
+      80% {
+        transform: translate(10px, -5px);
+      }
+
+      100% {
+        transform: translate(0, 0);
+      }
+    }
+
+    .hadouken-destroy {
+      animation: destroy 1.2s cubic-bezier(0.4, 2, 0.6, 1) forwards;
+    }
+
+    @keyframes destroy {
+      0% {
+        filter: none;
+        opacity: 1;
+      }
+
+      40% {
+        filter: blur(2px) brightness(1.2);
+      }
+
+      80% {
+        filter: blur(8px) brightness(2);
+      }
+
+      100% {
+        filter: blur(24px) brightness(0.2);
+        opacity: 0;
+      }
+    }
+  </style>
 </html>
