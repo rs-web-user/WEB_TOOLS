@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL抽出＆タイトル取得ツール</title>
+  </head>
+
+  <body>
+    <h1>URL抽出＆タイトル取得ツール</h1>
+    <p>文章を下に貼り付けて「URL抽出」をクリックしてください。</p>
+    <textarea
+      id="inputText"
+      placeholder="ここに文章を貼り付けてください..."
+    ></textarea>
+    <br /><br />
+    <button onclick="extractUrls()">URL抽出</button>
+    <div id="resultArea"></div>
+  </body>
+  <script>
+    function extractUrls() {
+      const text = document.getElementById("inputText").value;
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const urls = [...new Set(text.match(urlRegex) || [])]; // 重複排除
+
+      const resultArea = document.getElementById("resultArea");
+      resultArea.innerHTML = "<p>抽出されたURL数: " + urls.length + "</p>";
+
+      if (urls.length === 0) return;
+
+      const table = document.createElement("table");
+      const header = table.insertRow();
+      header.innerHTML = "<th>#</th><th>URL</th><th>タイトル</th>";
+
+      urls.forEach((url, index) => {
+        const row = table.insertRow();
+        row.insertCell().textContent = index + 1;
+        const linkCell = row.insertCell();
+        const link = document.createElement("a");
+        link.href = url;
+        link.textContent = url;
+        link.target = "_blank";
+        linkCell.appendChild(link);
+        const titleCell = row.insertCell();
+        titleCell.textContent = "取得中...";
+
+        fetchTitle(url, titleCell);
+      });
+
+      resultArea.appendChild(table);
+    }
+
+    async function fetchTitle(url, cell) {
+      try {
+        const proxyUrl =
+          "https://api.allorigins.win/get?url=" + encodeURIComponent(url);
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error("Fetch failed");
+
+        const data = await response.json();
+        const html = data.contents;
+        const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+        if (titleMatch) {
+          cell.textContent = titleMatch[1];
+        } else {
+          cell.textContent = "タイトルなし";
+        }
+      } catch (e) {
+        cell.innerHTML = '<span class="error">取得失敗</span>';
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: "Segoe UI", "Meiryo", sans-serif;
+      padding: 20px;
+      background: #181c20;
+      color: #e0e0e0;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      background: #23272b;
+      color: #e0e0e0;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 1em;
+      resize: vertical;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #23272b;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    th,
+    td {
+      border: 1px solid #333;
+      padding: 10px;
+    }
+
+    th {
+      background-color: #23272b;
+      color: #a6bfff;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #202428;
+    }
+
+    tr:nth-child(odd) {
+      background-color: #23272b;
+    }
+
+    tr:hover {
+      background-color: #2c3136;
+    }
+
+    a {
+      color: #4fc3f7;
+      text-decoration: underline;
+    }
+
+    a:hover {
+      color: #81d4fa;
+    }
+
+    button {
+      background: linear-gradient(90deg, #23272b 0%, #33373b 100%);
+      color: #a6bfff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 24px;
+      font-size: 1.1em;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    button:hover {
+      background: #33373b;
+      color: #fffde7;
+    }
+
+    .error {
+      color: #ff5252;
+      font-size: 0.95em;
+    }
+
+    #resultArea p {
+      color: #bdbdbd;
+    }
+  </style>
+</html>

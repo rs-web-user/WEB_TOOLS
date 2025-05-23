@@ -2,35 +2,129 @@
 <html>
 
 <body>
-    <input type="file" id="imageFile" style="margin-bottom: 50px;">
-    <br>
-    <img id="preview" style="max-width: 900px;">
-    <br>
+    <!-- ファイル選択ボタンをカスタムラベルでラップ -->
+    <label for="imageFile" id="customFileLabel">画像を選択</label>
+    <input type="file" id="imageFile" style="display:none;" />
+    <br />
+    <img id="preview" />
+    <br />
     <button id="copyButton">base64をコピー</button>
-    <p id="base64" style="width: 900px; overflow-wrap: break-word;"></p>
-
-    <script>
-        document.getElementById('imageFile').addEventListener('change', function () {
-                var file = this.files[0];
-                var reader = new FileReader();
-                reader.onloadend = function () {
-                    var base64Text = reader.result;
-                    document.getElementById('base64').innerText = base64Text;
-                    // プレビューを表示
-                    document.getElementById('preview').src = base64Text;
-                }
-                reader.readAsDataURL(file);
-            });
-
-        document.getElementById('copyButton').addEventListener('click', function () {
-            var base64Text = document.getElementById('base64').innerText;
-            navigator.clipboard.writeText(base64Text).then(function () {
-                console.log('Copying to clipboard was successful!');
-            }, function (err) {
-                console.error('Could not copy text: ', err);
-            });
-        });
-    </script>
+    <p id="base64"></p>
 </body>
+<script>
+    document
+        .getElementById("imageFile")
+        .addEventListener("change", function () {
+            var file = this.files[0];
+            var reader = new FileReader();
+            reader.onloadend = function () {
+                var base64Text = reader.result;
+                document.getElementById("base64").innerText = base64Text;
+                // プレビューを表示
+                document.getElementById("preview").src = base64Text;
+            };
+            reader.readAsDataURL(file);
+        });
+
+    document
+        .getElementById("copyButton")
+        .addEventListener("click", function () {
+            var base64Text = document.getElementById("base64").innerText;
+            navigator.clipboard.writeText(base64Text).then(
+                function () {
+                    console.log("Copying to clipboard was successful!");
+                },
+                function (err) {
+                    console.error("Could not copy text: ", err);
+                }
+            );
+        });
+
+    // ファイル選択時にラベルのテキストをファイル名に変更
+    document.getElementById("imageFile").addEventListener("change", function () {
+        var file = this.files[0];
+        if (file) {
+            document.getElementById("customFileLabel").textContent = file.name;
+        } else {
+            document.getElementById("customFileLabel").textContent = "画像を選択";
+        }
+    });
+</script>
+<style>
+    body {
+        background: #181a1b;
+        color: #e0e0e0;
+        font-family: "Segoe UI", "Meiryo", sans-serif;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    /* カスタムファイル選択ボタン */
+    #customFileLabel {
+        display: inline-block;
+        background: linear-gradient(90deg, #2d8cf0 60%, #1a6dc2 100%);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 32px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 40px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px #0005;
+        letter-spacing: 1px;
+        transition: background 0.2s, transform 0.1s;
+    }
+
+    #customFileLabel:hover {
+        background: linear-gradient(90deg, #1a6dc2 60%, #2d8cf0 100%);
+        transform: scale(1.04);
+    }
+
+    /* #preview にはスタイルを適用しない */
+
+    #copyButton {
+        background: #2d8cf0;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 28px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-bottom: 18px;
+        transition: background 0.2s;
+    }
+
+    #copyButton:hover {
+        background: #1a6dc2;
+    }
+
+    #base64 {
+        background: #23272a;
+        color: #b5e853;
+        border-radius: 6px;
+        border: 1px solid #333;
+        padding: 16px;
+        width: 90vw;
+        max-width: 900px;
+        min-height: 60px;
+        font-size: 0.95rem;
+        font-family: "Consolas", "Menlo", "Monaco", monospace;
+        box-sizing: border-box;
+        overflow-wrap: break-word;
+        word-break: break-all;
+        white-space: pre-wrap;
+        /* スクロール無しで全文表示 */
+        overflow-x: visible;
+        overflow-y: visible;
+        max-height: none;
+    }
+</style>
 
 </html>

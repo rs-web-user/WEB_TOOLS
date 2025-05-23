@@ -1,41 +1,99 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>iframe埋め込みテスト</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-        }
-        .container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-            background-color: gray;
-        }
-        iframe {
-            width: 80%;
-            height: 600px;
-            border: none;
-        }
-        .content {
-            margin: 20px;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-    </style>
-</head>
-<body>
+  </head>
+
+  <body>
     <div class="container">
-        <div class="content">
-        iframe埋め込みテスト
-        </div>
-        <iframe src="https://funding.fundi.co.jp/fund_list" title="ローカルiframeテスト"></iframe>
+      <div class="content">iframe埋め込みテスト</div>
+      <input
+        type="text"
+        id="iframeUrl"
+        placeholder="URLを入力してください"
+        style="width: 70%; padding: 8px; font-size: 16px"
+      />
+      <button
+        id="loadBtn"
+        style="margin: 12px 0 24px 0; padding: 8px 20px; font-size: 16px"
+      >
+        表示
+      </button>
+      <iframe id="iframe" src="" title="ローカルiframeテスト"></iframe>
     </div>
-</body>
+  </body>
+  <script>
+    const btn = document.getElementById("loadBtn");
+    const input = document.getElementById("iframeUrl");
+    const iframe = document.getElementById("iframe");
+    btn.addEventListener("click", function () {
+      let url = input.value.trim();
+      if (url) {
+        if (!/^https?:\/\//.test(url)) {
+          url = "https://" + url;
+        }
+        iframe.src = url;
+      }
+    });
+    // Enterキーでも表示できるように
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        btn.click();
+      }
+    });
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #181a1b;
+      color: #f1f1f1;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      background-color: #23272a;
+    }
+
+    iframe {
+      width: 80%;
+      height: 600px;
+      border: none;
+      background-color: #222;
+    }
+
+    .content {
+      margin: 20px;
+      padding: 20px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background-color: #23272a;
+      color: #f1f1f1;
+    }
+
+    input[type="text"] {
+      background: #23272a;
+      color: #f1f1f1;
+      border: 1px solid #444;
+      border-radius: 4px;
+    }
+
+    button {
+      background: #444;
+      color: #f1f1f1;
+      border: none;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #666;
+    }
+  </style>
 </html>
