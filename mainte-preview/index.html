@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="jp">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>メンテナンステスト</title>
+  </head>
+  <body>
+    <textarea
+      id="bodyInput"
+      style="width: 100%; height: 200px"
+      placeholder="Maintenance関数内のbody変数を入力"
+    ></textarea>
+    <div id="content"></div>
+  </body>
+  <script>
+    let body = "";
+
+    function updateBody() {
+      const inputValue = document.getElementById("bodyInput").value;
+      try {
+        body = eval(inputValue);
+        document.getElementById("content").innerHTML = body;
+      } catch (e) {
+        document.getElementById("content").innerHTML =
+          '<span style="color:red;">構文エラー</span>';
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("content").innerHTML = body;
+      document
+        .getElementById("bodyInput")
+        .addEventListener("input", updateBody);
+    });
+  </script>
+</html>
