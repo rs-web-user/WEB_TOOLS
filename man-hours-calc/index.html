@@ -7,6 +7,15 @@
   </head>
 
   <body>
+    <div style="display: flex; gap: 8px; max-width: 650px; margin: auto;">
+      <div id="file-info" style="color: #555; font-size: 15px;"></div>
+      <button type="button" class="add-btn" onclick="addProjectRow()">
+        ＋案件追加
+      </button>
+      <button type="button" class="save-btn" onclick="exportProjects()">
+        jsonファイル保存
+      </button>
+    </div>
     <div class="container">
       <form id="manHourForm" onsubmit="return false;">
         <div
@@ -14,23 +23,10 @@
           style="display: flex; gap: 12px; margin-bottom: 4px"
         ></div>
         <div id="projects"></div>
-        <div style="margin-top: 16px; display: flex; gap: 8px">
-          <button type="button" class="add-btn" onclick="addProjectRow()">
-            ＋案件追加
-          </button>
-          <button type="button" class="save-btn" onclick="exportProjects()">
-            jsonファイル保存
-          </button>
-        </div>
-        <div
-          id="file-info"
-          style="margin-top: 12px; color: #555; font-size: 0.95em"
-        ></div>
       </form>
       <div
         id="summary-block"
         style="
-          margin-top: 32px;
           background: #f4f8fb;
           border-radius: 8px;
           padding: 16px;
@@ -38,7 +34,7 @@
           margin-left: auto;
           margin-right: auto;
           box-shadow: 0 1px 4px #0001;
-          font-size: 1.1rem;
+          font-size: 15px;
         "
       ></div>
     </div>
@@ -51,9 +47,8 @@
         position: fixed;
         z-index: 1000;
         left: 0;
-        top: 0;
+        top: -100px;
         width: 100vw;
-        height: 100vh;
         background: rgba(0, 0, 0, 0.35);
       "
     >
@@ -61,22 +56,22 @@
         style="
           background: #fff;
           border-radius: 8px;
-          padding: 100px 24px 300px;
+          padding: 100px 24px 50px;
           max-width: 600px;
           margin: 120px auto 0 auto;
           box-shadow: 0 2px 16px #0003;
           text-align: center;
         "
       >
-        <div style="font-size: 1.1em; margin-bottom: 18px">
+        <div style="font-size: 20px; margin-bottom: 18px">
           案件データのJSONファイルを選択してください
         </div>
         <button
           id="modal-pick-btn"
           style="
             width: 100%;
-            height: 300px;
-            font-size: 2em;
+            height: 600px;
+            font-size: 50px;
             padding: 24px 0;
             border-radius: 12px;
             background: #007bff;
@@ -89,7 +84,7 @@
         >
           ファイルを選択
         </button>
-        <button style="margin-top: 250px" onclick="createProjects()">
+        <button style="margin-top: 80px" onclick="createProjects()">
           ファイルを作成
         </button>
       </div>
@@ -333,7 +328,7 @@
         .padStart(2, "0")}`;
       html += `<strong>合計工数: <span style="color:#007bff;">${total.toFixed(
         2
-      )}</span> h （実時間:<span style="margin-left:12px; color:#007bff; font-size:0.98em;">${totalTimeStr}</span>）</strong>`;
+      )}</span> h （実時間:<span style="margin-left:12px; color:#007bff; font-size: 15px;">${totalTimeStr}</span>）</strong>`;
       document.getElementById("summary-block").innerHTML = html;
     }
 
@@ -384,7 +379,6 @@
     body {
       font-family: sans-serif;
       background: #f7f7f7;
-      padding: 40px 40px 0 40px;
       margin: 0;
     }
 
@@ -396,6 +390,9 @@
       margin: auto;
       box-shadow: 0 2px 8px #0001;
     }
+    #manHourForm {
+      font-size: 15px;
+    }
 
     label {
       display: block;
@@ -405,14 +402,12 @@
     input[type="text"],
     input[type="time"] {
       width: 100%;
-      margin-top: 4px;
       border: 1px solid #ccc;
       border-radius: 4px;
-      height: 25px;
+      font-size: 12px;
     }
 
     .project-row {
-      border: 1px solid #eee;
       border-radius: 6px;
       background: #fafbfc;
       position: relative;
@@ -436,16 +431,14 @@
       position: static;
       margin-left: 8px;
       align-self: flex-start;
-      height: 32px;
+      font-size: 10px;
     }
 
     .add-btn {
-      margin-top: 8px;
       background: #28a745;
       color: #fff;
       border: none;
       border-radius: 4px;
-      padding: 8px 16px;
       cursor: pointer;
     }
 
@@ -454,12 +447,10 @@
     }
 
     .save-btn {
-      margin-top: 8px;
       background: #007bff;
       color: #fff;
       border: none;
       border-radius: 4px;
-      padding: 8px 16px;
       cursor: pointer;
       transition: background 0.2s;
     }
@@ -476,7 +467,7 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 1rem;
+      font-size: 15px;
     }
 
     button[type="submit"]:hover {
@@ -485,7 +476,7 @@
 
     .result {
       margin-top: 24px;
-      font-size: 1.1rem;
+      font-size: 15px;
     }
 
     .result-table {
@@ -508,7 +499,7 @@
     #modal-pick-btn {
       width: 100%;
       height: 80px;
-      font-size: 2em;
+      font-size: 15px;
       padding: 24px 0;
       border-radius: 12px;
       background: #007bff;
