@@ -7,14 +7,15 @@
   </head>
 
   <body>
-    <div style="display: flex; gap: 8px; max-width: 650px; margin: auto;">
-      <div id="file-info" style="color: #555; font-size: 15px;"></div>
+    <div style="display: flex; gap: 8px; max-width: 650px; margin: auto">
+      <div id="file-info" style="color: #555; font-size: 15px"></div>
       <button type="button" class="add-btn" onclick="addProjectRow()">
         ＋案件追加
       </button>
       <button type="button" class="save-btn" onclick="exportProjects()">
         jsonファイル保存
       </button>
+      <button type="button" class="end-btn" onclick="endWorks()">終業</button>
     </div>
     <div class="container">
       <form id="manHourForm" onsubmit="return false;">
@@ -86,6 +87,48 @@
         </button>
         <button style="margin-top: 80px" onclick="createProjects()">
           ファイルを作成
+        </button>
+      </div>
+    </div>
+    <!-- 終業モーダル -->
+    <div
+      id="endwork-modal"
+      style="
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: -100px;
+        width: 100vw;
+        background: rgba(0, 0, 0, 0.35);
+      "
+    >
+      <div
+        style="
+          background: #fff;
+          border-radius: 8px;
+          padding: 100px 24px 50px;
+          max-width: 600px;
+          margin: 120px auto 0 auto;
+          box-shadow: 0 2px 16px #0003;
+          text-align: center;
+        "
+      >
+        <div style="font-size: 20px; margin-bottom: 18px">Redmine入力</div>
+        <div style="font-size: 20px; margin-bottom: 18px">Garoon入力</div>
+
+        <button
+          style="
+            padding: 10px 20px;
+            background: #6c757d;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+          "
+          onclick="closeModal('endwork-modal')"
+        >
+          閉じる
         </button>
       </div>
     </div>
@@ -315,9 +358,11 @@
         total += manHour;
       }
       let html =
-        '<strong>案件別合計工数</strong><ul style="margin:8px 0 16px 20px;">';
+        '<strong>案件別合計工数</strong> <button type="button" onclick="copySummaryToClipboard()">案件名コピー</button><ul style="margin:8px 0 16px 20px; list-style-type: decimal;">';
       for (const [project, sum] of Object.entries(summary)) {
-        html += `<li>${project}: <strong>${sum.toFixed(2)}</strong> h</li>`;
+        html += `<li>${project}<span style="user-select: none;">: </span><strong>${sum.toFixed(
+          2
+        )}</strong><span style="user-select: none;"> h</span></li>`;
       }
       html += "</ul>";
       // 合計工数（小数）から現実時間（hh:mm）を計算
@@ -374,6 +419,48 @@
         document.getElementById("file-info").textContent = "";
       }
     }
+
+    function copySummaryToClipboard() {
+      const projectsDiv = document.getElementById("projects");
+      const rows = projectsDiv.getElementsByClassName("project-row");
+      const summary = {};
+      for (let row of rows) {
+        const project = row.querySelector('input[name="project"]').value.trim();
+        const start = row.querySelector('input[name="start"]').value;
+        const end = row.querySelector('input[name="end"]').value;
+        if (!project || !start || !end) continue;
+        const [startHour, startMin] = start.split(":").map(Number);
+        const [endHour, endMin] = end.split(":").map(Number);
+        let startTotal = startHour * 60 + startMin;
+        let endTotal = endHour * 60 + endMin;
+        if (endTotal < startTotal) endTotal += 24 * 60;
+        const diffMin = endTotal - startTotal;
+        const manHour = diffMin / 60;
+        if (!summary[project]) summary[project] = 0;
+        summary[project] += manHour;
+      }
+
+      let textToCopy = "";
+      for (const [project, sum] of Object.entries(summary)) {
+        textToCopy += `${project}\n`;
+      }
+
+      navigator.clipboard
+        .writeText(textToCopy)
+        .then(() => {
+          console.log("工数サマリーをクリップボードにコピーしました！");
+        })
+        .catch((err) => {
+          console.error("クリップボードへのコピーに失敗しました:", err);
+          alert("クリップボードへのコピーに失敗しました。");
+        });
+    }
+    function endWorks() {
+      document.getElementById("endwork-modal").style.display = "block";
+    }
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = "none";
+    }
   </script>
   <style>
     body {
@@ -390,6 +477,7 @@
       margin: auto;
       box-shadow: 0 2px 8px #0001;
     }
+
     #manHourForm {
       font-size: 15px;
     }
@@ -457,6 +545,20 @@
 
     .save-btn:hover {
       background: #0056b3;
+    }
+
+    .end-btn {
+      background: #ff00e1;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 100px;
+    }
+
+    .end-btn:hover {
+      background: #bd02a7;
     }
 
     button[type="submit"] {
