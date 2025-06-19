@@ -21,7 +21,7 @@
       <form id="manHourForm" onsubmit="return false;">
         <div
           id="project-labels"
-          style="display: flex; gap: 12px; margin-bottom: 4px"
+          style="display: flex; margin-bottom: 4px"
         ></div>
         <div id="projects"></div>
       </form>
@@ -144,10 +144,10 @@
       row.className = "project-row";
       row.innerHTML = `
                 <div class="input-group">
-                    <input type="text" name="project" value="${project}">
+                    <input type="text" name="project" value="${project}" tabindex="-1">
                 </div>
                 <div class="input-group">
-                    <input type="time" name="start" value="${start}" step="900">
+                    <input type="time" name="start" value="${start}" step="900" tabindex="-1">
                 </div>
                 <div class="input-group">
                     <input type="time" name="end" value="${end}" step="900">
@@ -155,7 +155,7 @@
                 <div class="input-group manhour-group">
                     <span class="manhour-value"></span>
                 </div>
-                <button type="button" class="remove-btn" onclick="removeProjectRow(this)">削除</button>
+                <button type="button" class="remove-btn" onclick="removeProjectRow(this)" tabindex="-1">削除</button>
             `;
       projectsDiv.appendChild(row);
 
@@ -185,6 +185,7 @@
       const projectInput = row.querySelector('input[name="project"]');
       projectInput.addEventListener("input", function () {
         console.log("案件名入力");
+        updateManHour(row);
         updateSummaryBlock();
         saveProjectsToFile();
       });
@@ -201,6 +202,29 @@
       updateSummaryBlock();
       saveProjectsToFile();
     }
+    function updateAllManHours() {
+        const projectsDiv = document.getElementById("projects");
+        const rows = projectsDiv.getElementsByClassName("project-row");
+        for (let row of rows) {
+          const start = row.querySelector('input[name="start"]').value;
+          const end = row.querySelector('input[name="end"]').value;
+          const manhourSpan = row.querySelector(".manhour-value");
+          if (!start || !end) {
+            manhourSpan.textContent = "";
+            continue;
+          }
+          const [startHour, startMin] = start.split(":").map(Number);
+          const [endHour, endMin] = end.split(":").map(Number);
+          let startTotal = startHour * 60 + startMin;
+          let endTotal = endHour * 60 + endMin;
+          if (endTotal < startTotal) {
+            endTotal += 24 * 60;
+          }
+          const diffMin = endTotal - startTotal;
+          const manHour = (diffMin / 60).toFixed(2);
+          manhourSpan.textContent = manHour + " h";
+        }
+      }
     function updateManHour(row) {
       const start = row.querySelector('input[name="start"]').value;
       const end = row.querySelector('input[name="end"]').value;
@@ -219,6 +243,8 @@
       const diffMin = endTotal - startTotal;
       const manHour = (diffMin / 60).toFixed(2);
       manhourSpan.textContent = manHour + " h";
+      // 全行の manHour を更新
+      updateAllManHours();
       // 工数が変わったらサマリーも更新
       updateSummaryBlock();
     }
@@ -230,7 +256,6 @@
       const labelNames = ["案件名", "開始時間", "終了時間", "工数", ""];
       for (let i = 0; i < labelNames.length; i++) {
         const label = document.createElement("div");
-        label.style.flex = i === 0 ? "3.5" : i === 4 ? "none" : "1";
         label.style.minWidth = "0";
         label.style.fontWeight = "bold";
         label.textContent = labelNames[i];
@@ -482,6 +507,16 @@
       font-size: 15px;
     }
 
+    #project-labels div:nth-child(2) {
+      margin-left: 317px;
+    }
+    #project-labels div:nth-child(3) {
+      margin-left: 5px;
+    }
+    #project-labels div:nth-child(4) {
+      margin-left: 10px;
+    }
+
     label {
       display: block;
       margin-top: 8px;
@@ -489,10 +524,19 @@
 
     input[type="text"],
     input[type="time"] {
-      width: 100%;
+      width: 95%;
       border: 1px solid #ccc;
       border-radius: 4px;
       font-size: 12px;
+    }
+
+    input[type="time"] {
+      width: 80%;
+      text-align: center;
+    }
+
+    [type='time']::-webkit-calendar-picker-indicator {
+      display: none;
     }
 
     .project-row {
@@ -501,7 +545,6 @@
       position: relative;
       display: flex;
       align-items: center;
-      gap: 12px;
     }
 
     .input-group {
@@ -512,7 +555,7 @@
     }
 
     .input-group:first-child {
-      flex: 2.9;
+      flex: 4;
     }
 
     .remove-btn {
