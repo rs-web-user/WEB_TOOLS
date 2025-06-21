@@ -1,33 +1,29 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GitHub</title>
-  </head>
 
-  <body>
-    <div style="display: flex; gap: 8px; max-width: 650px; margin: auto">
-      <div id="file-info" style="color: #555; font-size: 15px"></div>
-      <button type="button" class="add-btn" onclick="addProjectRow()">
-        ＋案件追加
-      </button>
-      <button type="button" class="save-btn" onclick="exportProjects()">
-        jsonファイル保存
-      </button>
-      <button type="button" class="end-btn" onclick="endWorks()">終業</button>
-    </div>
-    <div class="container">
-      <form id="manHourForm" onsubmit="return false;">
-        <div
-          id="project-labels"
-          style="display: flex; margin-bottom: 4px"
-        ></div>
-        <div id="projects"></div>
-      </form>
-      <div
-        id="summary-block"
-        style="
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GitHub</title>
+</head>
+
+<body>
+  <div style="display: flex; gap: 8px; max-width: 650px; margin: auto">
+    <div id="file-info" style="color: #555; font-size: 15px"></div>
+    <button type="button" class="add-btn" onclick="addProjectRow()">
+      ＋案件追加
+    </button>
+    <button type="button" class="save-btn" onclick="exportProjects()">
+      jsonファイル保存
+    </button>
+    <button type="button" class="end-btn" onclick="endWorks()">終業</button>
+  </div>
+  <div class="container">
+    <form id="manHourForm" onsubmit="return false;">
+      <div id="project-labels" style="display: flex; margin-bottom: 4px"></div>
+      <div id="projects"></div>
+    </form>
+    <div id="summary-block" style="
           background: #f4f8fb;
           border-radius: 8px;
           padding: 16px;
@@ -36,14 +32,11 @@
           margin-right: auto;
           box-shadow: 0 1px 4px #0001;
           font-size: 15px;
-        "
-      ></div>
-    </div>
+        "></div>
+  </div>
 
-    <!-- ファイル選択モーダル -->
-    <div
-      id="file-modal"
-      style="
+  <!-- ファイル選択モーダル -->
+  <div id="file-modal" style="
         display: none;
         position: fixed;
         z-index: 1000;
@@ -51,10 +44,8 @@
         top: -100px;
         width: 100vw;
         background: rgba(0, 0, 0, 0.35);
-      "
-    >
-      <div
-        style="
+      ">
+    <div style="
           background: #fff;
           border-radius: 8px;
           padding: 100px 24px 50px;
@@ -62,14 +53,11 @@
           margin: 120px auto 0 auto;
           box-shadow: 0 2px 16px #0003;
           text-align: center;
-        "
-      >
-        <div style="font-size: 20px; margin-bottom: 18px">
-          案件データのJSONファイルを選択してください
-        </div>
-        <button
-          id="modal-pick-btn"
-          style="
+        ">
+      <div style="font-size: 20px; margin-bottom: 18px">
+        案件データのJSONファイルを選択してください
+      </div>
+      <button id="modal-pick-btn" style="
             width: 100%;
             height: 600px;
             font-size: 50px;
@@ -81,19 +69,16 @@
             cursor: pointer;
             margin-top: 32px;
             transition: background 0.2s;
-          "
-        >
-          ファイルを選択
-        </button>
-        <button style="margin-top: 80px" onclick="createProjects()">
-          ファイルを作成
-        </button>
-      </div>
+          ">
+        ファイルを選択
+      </button>
+      <button style="margin-top: 80px" onclick="createProjects()">
+        ファイルを作成
+      </button>
     </div>
-    <!-- 終業モーダル -->
-    <div
-      id="endwork-modal"
-      style="
+  </div>
+  <!-- 終業モーダル -->
+  <div id="endwork-modal" style="
         display: none;
         position: fixed;
         z-index: 1000;
@@ -101,10 +86,8 @@
         top: -100px;
         width: 100vw;
         background: rgba(0, 0, 0, 0.35);
-      "
-    >
-      <div
-        style="
+      ">
+    <div style="
           background: #fff;
           border-radius: 8px;
           padding: 100px 24px 50px;
@@ -112,37 +95,44 @@
           margin: 120px auto 0 auto;
           box-shadow: 0 2px 16px #0003;
           text-align: center;
-        "
-      >
-        <div style="font-size: 20px; margin-bottom: 18px">Redmine入力</div>
-        <div style="font-size: 20px; margin-bottom: 18px">Garoon入力</div>
-
-        <button
-          style="
+        ">
+      <div style="width: 400px; margin:10px auto; background-color: #f5f5f5;">
+        <div style="font-size: 20px; margin-bottom: 10px;">Redmine入力</div>
+        <div id="redmine-table-container"></div>
+        <button id="redmine-bulk-post-btn"
+          style="background: #e74c3c; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; cursor: pointer; margin-top: 10px;">一括Redmine登録</button>
+      </div>
+      <div style="width: 400px; margin:10px auto; background-color: #f5f5f5;">
+        <div style="font-size: 20px; margin-bottom: 10px;">
+          Garoon入力
+        </div>
+        <textarea class="input-garoon-area" style="resize:none;width:90%;overflow:hidden;"></textarea>
+      </div>
+      <button style="
             padding: 10px 20px;
             background: #6c757d;
             color: #fff;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-          "
-          onclick="closeModal('endwork-modal')"
-        >
-          閉じる
-        </button>
-      </div>
+          " onclick="closeModal('endwork-modal')">
+        閉じる
+      </button>
     </div>
-  </body>
-  <script>
-    let projectCount = 0;
-    let fileHandle = null;
+  </div>
+</body>
+<script>
+  let projectCount = 0;
+  let fileHandle = null;
+  // Redmine設定グローバル
+  let redmineConfig = { url: '', apiKey: '' };
 
-    function addProjectRow(project = "", start = "", end = "") {
-      projectCount++;
-      const projectsDiv = document.getElementById("projects");
-      const row = document.createElement("div");
-      row.className = "project-row";
-      row.innerHTML = `
+  function addProjectRow(project = "", start = "", end = "") {
+    projectCount++;
+    const projectsDiv = document.getElementById("projects");
+    const row = document.createElement("div");
+    row.className = "project-row";
+    row.innerHTML = `
                 <div class="input-group">
                     <input type="text" name="project" value="${project}" tabindex="-1">
                 </div>
@@ -157,81 +147,61 @@
                 </div>
                 <button type="button" class="remove-btn" onclick="removeProjectRow(this)" tabindex="-1">削除</button>
             `;
-      projectsDiv.appendChild(row);
+    projectsDiv.appendChild(row);
 
-      // イベントリスナー追加
-      const endInput = row.querySelector('input[name="end"]');
-      endInput.addEventListener("change", function () {
-        // 次の行の開始時間に値をコピー
-        const nextRow = row.nextElementSibling;
-        if (nextRow) {
-          const nextStart = nextRow.querySelector('input[name="start"]');
-          if (nextStart) {
-            nextStart.value = endInput.value;
-          }
-        }
-        console.log("終了時間入力");
-        updateManHour(row);
-        updateSummaryBlock();
-        saveProjectsToFile();
-      });
-      const startInput = row.querySelector('input[name="start"]');
-      startInput.addEventListener("change", function () {
-        console.log("開始時間入力");
-        updateManHour(row);
-        updateSummaryBlock();
-        saveProjectsToFile();
-      });
-      const projectInput = row.querySelector('input[name="project"]');
-      projectInput.addEventListener("input", function () {
-        console.log("案件名入力");
-        updateManHour(row);
-        updateSummaryBlock();
-        saveProjectsToFile();
-      });
-      // 初期値があれば工数計算
-      if (startInput.value && endInput.value) {
-        updateManHour(row);
-      }
-      updateSummaryBlock();
-      saveProjectsToFile();
-    }
-    function removeProjectRow(btn) {
-      const row = btn.parentElement;
-      row.remove();
-      updateSummaryBlock();
-      saveProjectsToFile();
-    }
-    function updateAllManHours() {
-        const projectsDiv = document.getElementById("projects");
-        const rows = projectsDiv.getElementsByClassName("project-row");
-        for (let row of rows) {
-          const start = row.querySelector('input[name="start"]').value;
-          const end = row.querySelector('input[name="end"]').value;
-          const manhourSpan = row.querySelector(".manhour-value");
-          if (!start || !end) {
-            manhourSpan.textContent = "";
-            continue;
-          }
-          const [startHour, startMin] = start.split(":").map(Number);
-          const [endHour, endMin] = end.split(":").map(Number);
-          let startTotal = startHour * 60 + startMin;
-          let endTotal = endHour * 60 + endMin;
-          if (endTotal < startTotal) {
-            endTotal += 24 * 60;
-          }
-          const diffMin = endTotal - startTotal;
-          const manHour = (diffMin / 60).toFixed(2);
-          manhourSpan.textContent = manHour + " h";
+    // イベントリスナー追加
+    const endInput = row.querySelector('input[name="end"]');
+    endInput.addEventListener("change", function () {
+      // 次の行の開始時間に値をコピー
+      const nextRow = row.nextElementSibling;
+      if (nextRow) {
+        const nextStart = nextRow.querySelector('input[name="start"]');
+        if (nextStart) {
+          nextStart.value = endInput.value;
         }
       }
-    function updateManHour(row) {
+      console.log("終了時間入力");
+      updateManHour(row);
+      updateSummaryBlock();
+      saveProjectsToFile();
+    });
+    const startInput = row.querySelector('input[name="start"]');
+    startInput.addEventListener("change", function () {
+      console.log("開始時間入力");
+      updateManHour(row);
+      updateSummaryBlock();
+      saveProjectsToFile();
+    });
+    const projectInput = row.querySelector('input[name="project"]');
+    projectInput.addEventListener("input", function () {
+      console.log("案件名入力");
+      updateManHour(row);
+      updateSummaryBlock();
+      saveProjectsToFile();
+    });
+    // 初期値があれば工数計算
+    if (startInput.value && endInput.value) {
+      updateManHour(row);
+    }
+    updateSummaryBlock();
+    saveProjectsToFile();
+  }
+  function removeProjectRow(btn) {
+    const row = btn.parentElement;
+    row.remove();
+    updateSummaryBlock();
+    saveProjectsToFile();
+  }
+  function updateAllManHours() {
+    const projectsDiv = document.getElementById("projects");
+    const rows = projectsDiv.getElementsByClassName("project-row");
+    for (let row of rows) {
       const start = row.querySelector('input[name="start"]').value;
       const end = row.querySelector('input[name="end"]').value;
       const manhourSpan = row.querySelector(".manhour-value");
       if (!start || !end) {
         manhourSpan.textContent = "";
-        return;
+        continue;
       }
       const [startHour, startMin] = start.split(":").map(Number);
       const [endHour, endMin] = end.split(":").map(Number);
@@ -243,99 +213,109 @@
       const diffMin = endTotal - startTotal;
       const manHour = (diffMin / 60).toFixed(2);
       manhourSpan.textContent = manHour + " h";
-      // 全行の manHour を更新
-      updateAllManHours();
-      // 工数が変わったらサマリーも更新
-      updateSummaryBlock();
     }
-    // 初期行を10個追加
-    window.onload = function () {
-      // ラベル行を作成
-      const labelsDiv = document.getElementById("project-labels");
-      labelsDiv.innerHTML = "";
-      const labelNames = ["案件名", "開始時間", "終了時間", "工数", ""];
-      for (let i = 0; i < labelNames.length; i++) {
-        const label = document.createElement("div");
-        label.style.minWidth = "0";
-        label.style.fontWeight = "bold";
-        label.textContent = labelNames[i];
-        labelsDiv.appendChild(label);
-      }
-      for (let i = 0; i < 10; i++) {
-        addProjectRow();
-      }
-      // 初回起動時にモーダル表示
-      document.getElementById("file-modal").style.display = "block";
-    };
-    function getAllProjects() {
-      const projectsDiv = document.getElementById("projects");
-      const rows = projectsDiv.getElementsByClassName("project-row");
-      let data = [];
-      for (let row of rows) {
-        data.push({
-          project: row.querySelector('input[name="project"]').value,
-          start: row.querySelector('input[name="start"]').value,
-          end: row.querySelector('input[name="end"]').value,
-        });
-      }
-      return data;
+  }
+  function updateManHour(row) {
+    const start = row.querySelector('input[name="start"]').value;
+    const end = row.querySelector('input[name="end"]').value;
+    const manhourSpan = row.querySelector(".manhour-value");
+    if (!start || !end) {
+      manhourSpan.textContent = "";
+      return;
     }
-    function setAllProjects(data) {
-      const projectsDiv = document.getElementById("projects");
-      projectsDiv.innerHTML = "";
-      for (let i = 0; i < data.length; i++) {
-        addProjectRow(data[i].project, data[i].start, data[i].end);
-      }
-      // 10件未満なら空行を追加
-      for (let i = data.length; i < 10; i++) {
-        addProjectRow();
-      }
+    const [startHour, startMin] = start.split(":").map(Number);
+    const [endHour, endMin] = end.split(":").map(Number);
+    let startTotal = startHour * 60 + startMin;
+    let endTotal = endHour * 60 + endMin;
+    if (endTotal < startTotal) {
+      endTotal += 24 * 60;
     }
-    function exportProjects() {
-      const data = getAllProjects();
-      const blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: "application/json",
+    const diffMin = endTotal - startTotal;
+    const manHour = (diffMin / 60).toFixed(2);
+    manhourSpan.textContent = manHour + " h";
+    // 全行の manHour を更新
+    updateAllManHours();
+    // 工数が変わったらサマリーも更新
+    updateSummaryBlock();
+  }
+  // 初期行を10個追加
+  window.onload = function () {
+    // ラベル行を作成
+    const labelsDiv = document.getElementById("project-labels");
+    labelsDiv.innerHTML = "";
+    const labelNames = ["案件名", "開始時間", "終了時間", "工数", ""];
+    for (let i = 0; i < labelNames.length; i++) {
+      const label = document.createElement("div");
+      label.style.minWidth = "0";
+      label.style.fontWeight = "bold";
+      label.textContent = labelNames[i];
+      labelsDiv.appendChild(label);
+    }
+    for (let i = 0; i < 10; i++) {
+      addProjectRow();
+    }
+    // 初回起動時にモーダル表示
+    document.getElementById("file-modal").style.display = "block";
+  };
+  function getAllProjects() {
+    const projectsDiv = document.getElementById("projects");
+    const rows = projectsDiv.getElementsByClassName("project-row");
+    let data = [];
+    for (let row of rows) {
+      data.push({
+        project: row.querySelector('input[name="project"]').value,
+        start: row.querySelector('input[name="start"]').value,
+        end: row.querySelector('input[name="end"]').value,
       });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "projects.json";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
     }
-    async function createProjects() {
-      const defaultData = [
+    // redmineConfigも含めて返す
+    return {
+      projects: data,
+      redmineConfig: { ...redmineConfig }
+    };
+  }
+  function setAllProjects(data) {
+    const projectsDiv = document.getElementById("projects");
+    projectsDiv.innerHTML = "";
+    // 新形式: { projects: [...], redmineConfig: {...} }
+    let arr = Array.isArray(data) ? data : data.projects;
+    for (let i = 0; i < arr.length; i++) {
+      addProjectRow(arr[i].project, arr[i].start, arr[i].end);
+    }
+    // 10件未満なら空行を追加
+    for (let i = arr.length; i < 10; i++) {
+      addProjectRow();
+    }
+    // Redmine設定も反映
+    if (data.redmineConfig) {
+      redmineConfig = { ...data.redmineConfig };
+    }
+  }
+  function exportProjects() {
+    const data = getAllProjects();
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "projects.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+  async function createProjects() {
+    const defaultData = {
+      projects: [
         { project: "新規案件A", start: "09:00", end: "12:00" },
-        { project: "新規案件B", start: "13:00", end: "18:00" },
-      ];
-      try {
-        fileHandle = await window.showSaveFilePicker({
-          suggestedName: "projects.json",
-          types: [
-            {
-              description: "JSON Files",
-              accept: { "application/json": [".json"] },
-            },
-          ],
-          startIn: "downloads",
-        });
-        const writable = await fileHandle.createWritable();
-        await writable.write(JSON.stringify(defaultData, null, 2));
-        await writable.close();
-
-        setAllProjects(defaultData); // 作成したデータをロード
-        await updateFileInfo(); // ファイル情報を更新
-        document.getElementById("file-modal").style.display = "none"; // モーダルを閉じる
-      } catch (e) {
-        console.error("ファイルの作成をキャンセルしました", e);
-        // ユーザーがキャンセルした場合、モーダルはそのままにするか、別の操作を促す
-      }
-    }
-    async function pickProjectFile() {
-      console.log("ファイルを選択させる");
-      [fileHandle] = await window.showOpenFilePicker({
+        { project: "新規案件B", start: "13:00", end: "18:00" }
+      ],
+      redmineConfig: { ...redmineConfig }
+    };
+    try {
+      fileHandle = await window.showSaveFilePicker({
+        suggestedName: "projects.json",
         types: [
           {
             description: "JSON Files",
@@ -344,346 +324,536 @@
         ],
         startIn: "downloads",
       });
-      // ファイル選択後に即インポート
-      if (fileHandle) {
-        try {
-          const file = await fileHandle.getFile();
-          const text = await file.text();
-          const data = JSON.parse(text);
-          if (Array.isArray(data)) {
-            setAllProjects(data);
-          } else {
-            alert("不正なファイル形式です");
-          }
-          await updateFileInfo();
-        } catch {
-          alert("ファイルの読み込みに失敗しました");
-        }
-      }
-    }
-    function updateSummaryBlock() {
-      const projectsDiv = document.getElementById("projects");
-      const rows = projectsDiv.getElementsByClassName("project-row");
-      const summary = {};
-      let total = 0;
-      for (let row of rows) {
-        const project = row.querySelector('input[name="project"]').value.trim();
-        const start = row.querySelector('input[name="start"]').value;
-        const end = row.querySelector('input[name="end"]').value;
-        if (!project || !start || !end) continue;
-        const [startHour, startMin] = start.split(":").map(Number);
-        const [endHour, endMin] = end.split(":").map(Number);
-        let startTotal = startHour * 60 + startMin;
-        let endTotal = endHour * 60 + endMin;
-        if (endTotal < startTotal) endTotal += 24 * 60;
-        const diffMin = endTotal - startTotal;
-        const manHour = diffMin / 60;
-        if (!summary[project]) summary[project] = 0;
-        summary[project] += manHour;
-        total += manHour;
-      }
-      let html =
-        '<strong>案件別合計工数</strong> <button type="button" onclick="copySummaryToClipboard()">案件名コピー</button><ul style="margin:8px 0 16px 20px; list-style-type: decimal;">';
-      for (const [project, sum] of Object.entries(summary)) {
-        html += `<li>${project}<span style="user-select: none;">: </span><strong>${sum.toFixed(
-          2
-        )}</strong><span style="user-select: none;"> h</span></li>`;
-      }
-      html += "</ul>";
-      // 合計工数（小数）から現実時間（hh:mm）を計算
-      const totalHours = Math.floor(total);
-      const totalMinutes = Math.round((total - totalHours) * 60);
-      const totalTimeStr = `${totalHours}:${totalMinutes
-        .toString()
-        .padStart(2, "0")}`;
-      html += `<strong>合計工数: <span style="color:#007bff;">${total.toFixed(
-        2
-      )}</span> h （実時間:<span style="margin-left:12px; color:#007bff; font-size: 15px;">${totalTimeStr}</span>）</strong>`;
-      document.getElementById("summary-block").innerHTML = html;
-    }
-
-    // 上書き保存
-    async function saveProjectsToFile() {
-      if (!fileHandle) {
-        await pickProjectFile();
-      }
       const writable = await fileHandle.createWritable();
-      await writable.write(JSON.stringify(getAllProjects(), null, 2));
+      await writable.write(JSON.stringify(defaultData, null, 2));
       await writable.close();
-      await updateFileInfo();
+
+      setAllProjects(defaultData); // 作成したデータをロード
+      await updateFileInfo(); // ファイル情報を更新
+      document.getElementById("file-modal").style.display = "none"; // モーダルを閉じる
+    } catch (e) {
+      console.error("ファイルの作成をキャンセルしました", e);
+      // ユーザーがキャンセルした場合、モーダルはそのままにするか、別の操作を促す
     }
-
-    document
-      .getElementById("modal-pick-btn")
-      .addEventListener("click", async function () {
-        await pickProjectFile();
-        // ファイル選択後にモーダルを閉じる
-        document.getElementById("file-modal").style.display = "none";
-        // 必要ならここでファイル内容の自動インポートも実行可能
-      });
-
-    async function updateFileInfo() {
-      if (!fileHandle) {
-        document.getElementById("file-info").textContent = "";
-        return;
-      }
+  }
+  async function pickProjectFile() {
+    console.log("ファイルを選択させる");
+    [fileHandle] = await window.showOpenFilePicker({
+      types: [
+        {
+          description: "JSON Files",
+          accept: { "application/json": [".json"] },
+        },
+      ],
+      startIn: "downloads",
+    });
+    // ファイル選択後に即インポート
+    if (fileHandle) {
       try {
         const file = await fileHandle.getFile();
-        const date = new Date(file.lastModified);
-        const html = `選択中ファイルの更新日時: <span id="file-date-span" style="color:#d00; font-weight:bold;">${date.toLocaleString()}</span>`;
-        document.getElementById("file-info").innerHTML = html;
-        // 発光エフェクトを付与
-        const dateSpan = document.getElementById("file-date-span");
-        if (dateSpan) {
-          dateSpan.classList.remove("flash-effect");
-          // 再付与のため一度リフロー
-          void dateSpan.offsetWidth;
-          dateSpan.classList.add("flash-effect");
-        }
+        const text = await file.text();
+        const data = JSON.parse(text);
+        setAllProjects(data);
+        await updateFileInfo();
       } catch {
-        document.getElementById("file-info").textContent = "";
+        alert("ファイルの読み込みに失敗しました");
       }
     }
+  }
+  function updateSummaryBlock() {
+    const projectsDiv = document.getElementById("projects");
+    const rows = projectsDiv.getElementsByClassName("project-row");
+    const summary = {};
+    let total = 0;
+    for (let row of rows) {
+      const project = row.querySelector('input[name="project"]').value.trim();
+      const start = row.querySelector('input[name="start"]').value;
+      const end = row.querySelector('input[name="end"]').value;
+      if (!project || !start || !end) continue;
+      const [startHour, startMin] = start.split(":").map(Number);
+      const [endHour, endMin] = end.split(":").map(Number);
+      let startTotal = startHour * 60 + startMin;
+      let endTotal = endHour * 60 + endMin;
+      if (endTotal < startTotal) endTotal += 24 * 60;
+      const diffMin = endTotal - startTotal;
+      const manHour = diffMin / 60;
+      if (!summary[project]) summary[project] = 0;
+      summary[project] += manHour;
+      total += manHour;
+    }
+    let html =
+      '<strong>案件別合計工数</strong> <button type="button" onclick="copySummaryToClipboard()">案件名コピー</button><ul style="margin:8px 0 16px 20px; list-style-type: decimal;">';
+    for (const [project, sum] of Object.entries(summary)) {
+      html += `<li>${project}<span style="user-select: none;">: </span><strong>${sum.toFixed(
+        2
+      )}</strong><span style="user-select: none;"> h</span></li>`;
+    }
+    html += "</ul>";
+    // 合計工数（小数）から現実時間（hh:mm）を計算
+    const totalHours = Math.floor(total);
+    const totalMinutes = Math.round((total - totalHours) * 60);
+    const totalTimeStr = `${totalHours}:${totalMinutes
+      .toString()
+      .padStart(2, "0")}`;
+    html += `<strong>合計工数: <span style="color:#007bff;">${total.toFixed(
+      2
+    )}</span> h （実時間:<span style="margin-left:12px; color:#007bff; font-size: 15px;">${totalTimeStr}</span>）</strong>`;
+    document.getElementById("summary-block").innerHTML = html;
+  }
 
-    function copySummaryToClipboard() {
-      const projectsDiv = document.getElementById("projects");
-      const rows = projectsDiv.getElementsByClassName("project-row");
-      const summary = {};
-      for (let row of rows) {
-        const project = row.querySelector('input[name="project"]').value.trim();
-        const start = row.querySelector('input[name="start"]').value;
-        const end = row.querySelector('input[name="end"]').value;
+  // 上書き保存
+  async function saveProjectsToFile() {
+    if (!fileHandle) {
+      await pickProjectFile();
+    }
+    const writable = await fileHandle.createWritable();
+    await writable.write(JSON.stringify(getAllProjects(), null, 2));
+    await writable.close();
+    await updateFileInfo();
+  }
+
+  document
+    .getElementById("modal-pick-btn")
+    .addEventListener("click", async function () {
+      await pickProjectFile();
+      // ファイル選択後にモーダルを閉じる
+      document.getElementById("file-modal").style.display = "none";
+      // 必要ならここでファイル内容の自動インポートも実行可能
+    });
+
+  async function updateFileInfo() {
+    if (!fileHandle) {
+      document.getElementById("file-info").textContent = "";
+      return;
+    }
+    try {
+      const file = await fileHandle.getFile();
+      const date = new Date(file.lastModified);
+      const html = `選択中ファイルの更新日時: <span id="file-date-span" style="color:#d00; font-weight:bold;">${date.toLocaleString()}</span>`;
+      document.getElementById("file-info").innerHTML = html;
+      // 発光エフェクトを付与
+      const dateSpan = document.getElementById("file-date-span");
+      if (dateSpan) {
+        dateSpan.classList.remove("flash-effect");
+        // 再付与のため一度リフロー
+        void dateSpan.offsetWidth;
+        dateSpan.classList.add("flash-effect");
+      }
+    } catch {
+      document.getElementById("file-info").textContent = "";
+    }
+  }
+
+  function copySummaryToClipboard() {
+    const projectsDiv = document.getElementById("projects");
+    const rows = projectsDiv.getElementsByClassName("project-row");
+    const summary = {};
+    for (let row of rows) {
+      const project = row.querySelector('input[name="project"]').value.trim();
+      const start = row.querySelector('input[name="start"]').value;
+      const end = row.querySelector('input[name="end"]').value;
+      if (!project || !start || !end) continue;
+      const [startHour, startMin] = start.split(":").map(Number);
+      const [endHour, endMin] = end.split(":").map(Number);
+      let startTotal = startHour * 60 + startMin;
+      let endTotal = endHour * 60 + endMin;
+      if (endTotal < startTotal) endTotal += 24 * 60;
+      const diffMin = endTotal - startTotal;
+      const manHour = diffMin / 60;
+      if (!summary[project]) summary[project] = 0;
+      summary[project] += manHour;
+    }
+
+    let textToCopy = "";
+    for (const [project, sum] of Object.entries(summary)) {
+      textToCopy += `${project}\n`;
+    }
+
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        console.log("工数サマリーをクリップボードにコピーしました！");
+      })
+      .catch((err) => {
+        console.error("クリップボードへのコピーに失敗しました:", err);
+        alert("クリップボードへのコピーに失敗しました。");
+      });
+  }
+  function endWorks() {
+    document.getElementById("endwork-modal").style.display = "block";
+    // 最後の終了時間を取得
+    let lastEnd = '';
+    let firstStart = '';
+    let hProjectWithin8h = false;
+    const rows = document.querySelectorAll('#projects .project-row');
+    // 1. 最初の開始時間を取得
+    for (let i = 0; i < rows.length; i++) {
+      const startVal = rows[i].querySelector('input[name="start"]').value;
+      if (startVal) {
+        firstStart = startVal;
+        break;
+      }
+    }
+    // 2. 最後の終了時間を取得
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const endVal = rows[i].querySelector('input[name="end"]').value;
+      if (endVal) {
+        lastEnd = endVal;
+        break;
+      }
+    }
+    // 3. 8時間以内に案件名hがあるか判定
+    if (firstStart) {
+      const [startHour, startMin] = firstStart.split(":").map(Number);
+      const startTotal = startHour * 60 + startMin;
+      const limitTotal = startTotal + 8 * 60;
+      for (let i = 0; i < rows.length; i++) {
+        const projectName = rows[i].querySelector('input[name="project"]').value.trim();
+        const startVal = rows[i].querySelector('input[name="start"]').value;
+        if (projectName === 'h' && startVal) {
+          const [hHour, hMin] = startVal.split(":").map(Number);
+          const hTotal = hHour * 60 + hMin;
+          if (hTotal >= startTotal && hTotal < limitTotal) {
+            hProjectWithin8h = true;
+            break;
+          }
+        }
+      }
+    }
+    // cc:ddの値を決定
+    let ccdd = 'cc:dd';
+    if (firstStart) {
+      ccdd = hProjectWithin8h ? '18:00' : '17:00';
+    }
+    // 業務日報報告文を挿入
+    const garoonArea = document.querySelector('.input-garoon-area');
+    if (garoonArea) {
+      const endTime = lastEnd || 'aa:bb';
+      // 案件名リストを作成（copySummaryToClipboardと同じ内容）
+      let summaryText = '';
+      for (let i = 0; i < rows.length; i++) {
+        const project = rows[i].querySelector('input[name="project"]').value.trim();
+        const start = rows[i].querySelector('input[name="start"]').value;
+        const end = rows[i].querySelector('input[name="end"]').value;
         if (!project || !start || !end) continue;
-        const [startHour, startMin] = start.split(":").map(Number);
-        const [endHour, endMin] = end.split(":").map(Number);
-        let startTotal = startHour * 60 + startMin;
-        let endTotal = endHour * 60 + endMin;
-        if (endTotal < startTotal) endTotal += 24 * 60;
-        const diffMin = endTotal - startTotal;
-        const manHour = diffMin / 60;
-        if (!summary[project]) summary[project] = 0;
-        summary[project] += manHour;
+        if (!summaryText.includes(project + '\n')) {
+          summaryText += `${project}\n`;
+        }
       }
+      garoonArea.value =
+        `③ 業務終了時間\n` +
+        `${endTime}　業務終了\n` +
+        `\n` +
+        `④ 残業時間（自至）\n` +
+        `${ccdd}　残業開始\n` +
+        `${endTime || 'ee:ff'}　残業終了\n` +
+        (hProjectWithin8h ? '' : '※内1h休憩\n') +
+        `\n` +
+        `⑤ 業務内容\n` +
+        summaryText;
+      // 高さ自動調整
+      autoResizeTextarea(garoonArea);
+      garoonArea.addEventListener('input', function () {
+        autoResizeTextarea(this);
+      });
+    }
+    showRedmineTable();
+  }
+  function closeModal(modalId) {
+    document.getElementById(modalId).style.display = "none";
+  }
+  // テキストエリアの高さ自動調整関数
+  function autoResizeTextarea(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+  // Redmine連携ボタンのイベントリスナー
+  document.getElementById('redmine-bulk-post-btn').addEventListener('click', async function () {
+    const projectsDiv = document.getElementById("projects");
+    const rows = projectsDiv.getElementsByClassName("project-row");
+    const container = document.getElementById("redmine-table-container");
+    let html = '<table style="width:100%; font-size:13px; border-collapse:collapse;">';
+    html += '<tr><th style="border:1px solid #ccc;">チケット番号</th><th style="border:1px solid #ccc;">日付</th><th style="border:1px solid #ccc;">案件名</th><th style="border:1px solid #ccc;">工数</th><th style="border:1px solid #ccc;">コメント</th><th style="border:1px solid #ccc;">作業分類</th></tr>';
+    for (let row of rows) {
+      const project = row.querySelector('input[name="project"]').value;
+      const manhour = row.querySelector('.manhour-value').textContent.replace(' h', '');
+      if (!project || !manhour) continue;
+      html += `<tr>
+        <td style='border:1px solid #ccc;'><input type='text' class='redmine-issue-id' style='width:70px;'></td>
+        <td style='border:1px solid #ccc;'><input type='date' class='redmine-spent-on' value='${new Date().toISOString().slice(0, 10)}' style='width:110px;'></td>
+        <td style='border:1px solid #ccc;'><input type='text' class='redmine-project-name' value='${project}' style='width:100px;'></td>
+        <td style='border:1px solid #ccc;'><input type='number' class='redmine-hours' value='${manhour}' step='0.01' min='0' style='width:60px;'></td>
+        <td style='border:1px solid #ccc;'><input type='text' class='redmine-comment' value='${project}' style='width:120px;'></td>
+        <td style='border:1px solid #ccc;'><input type='text' class='redmine-activity-id' style='width:60px;'></td>
+      </tr>`;
+    }
+    html += '</table>';
+    container.innerHTML = html;
+  });
+  // Redmine入力テーブルのチケット番号入力で案件名自動取得
+  function enableRedmineIssueAutoFill() {
+    const table = document.getElementById('redmine-table-container').querySelector('table');
+    if (!table) return;
+    const rows = table.querySelectorAll('tr');
+    for (let i = 1; i < rows.length; i++) { // 1行目はヘッダ
+      const row = rows[i];
+      const issueInput = row.querySelector('.redmine-issue-id');
+      const projectNameInput = row.querySelector('.redmine-project-name');
+      if (!issueInput || !projectNameInput) continue;
+      issueInput.addEventListener('change', async function () {
+        const issueId = issueInput.value.trim();
+        if (!issueId || !redmineConfig.url || !redmineConfig.apiKey) return;
+        projectNameInput.value = '取得中...';
+        try {
+          const res = await fetch(`${redmineConfig.url.replace(/\/$/, '')}/issues/${issueId}.json`, {
+            headers: { 'X-Redmine-API-Key': redmineConfig.apiKey }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.issue && data.issue.subject) {
+              projectNameInput.value = data.issue.subject;
+            } else {
+              projectNameInput.value = '';
+            }
+          } else {
+            projectNameInput.value = '';
+          }
+        } catch {
+          projectNameInput.value = '';
+        }
+      });
+    }
+  }
+  // showRedmineTable: Redmine入力テーブルを生成
+  function showRedmineTable() {
+    const projectsDiv = document.getElementById("projects");
+    const rows = projectsDiv.getElementsByClassName("project-row");
+    const container = document.getElementById("redmine-table-container");
+    let html = '<table style="width:100%; font-size:13px; border-collapse:collapse;">';
+    html += '<tr><th style="border:1px solid #ccc;">チケット番号</th><th style="border:1px solid #ccc;">日付</th><th style="border:1px solid #ccc;">案件名</th><th style="border:1px solid #ccc;">工数</th><th style="border:1px solid #ccc;">コメント</th><th style="border:1px solid #ccc;">作業分類</th></tr>';
+    for (let row of rows) {
+      const project = row.querySelector('input[name="project"]').value;
+      const manhour = row.querySelector('.manhour-value').textContent.replace(' h', '');
+      if (!project || !manhour) continue;
+      html += `<tr>
+        <td style='border:1px solid #ccc;'><input type='text' class='redmine-issue-id' style='width:70px;'></td>
+        <td style='border:1px solid #ccc;'><input type='date' class='redmine-spent-on' value='${new Date().toISOString().slice(0, 10)}' style='width:110px;'></td>
+        <td style='border:1px solid #ccc;'><input type='text' class='redmine-project-name' value='${project}' style='width:100px;'></td>
+        <td style='border:1px solid #ccc;'><input type='number' class='redmine-hours' value='${manhour}' step='0.01' min='0' style='width:60px;'></td>
+        <td style='border:1px solid #ccc;'><input type='text' class='redmine-comment' value='${project}' style='width:120px;'></td>
+        <td style='border:1px solid #ccc;'><input type='text' class='redmine-activity-id' style='width:60px;'></td>
+      </tr>`;
+    }
+    html += '</table>';
+    container.innerHTML = html;
+  }
+  // showRedmineTableの最後で自動補完有効化
+  const origShowRedmineTable = showRedmineTable;
+  showRedmineTable = function () {
+    origShowRedmineTable();
+    setTimeout(enableRedmineIssueAutoFill, 0);
+  }
+</script>
+<style>
+  body {
+    font-family: sans-serif;
+    background: #f7f7f7;
+    margin: 0;
+  }
 
-      let textToCopy = "";
-      for (const [project, sum] of Object.entries(summary)) {
-        textToCopy += `${project}\n`;
-      }
+  .container {
+    background: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    max-width: 600px;
+    margin: auto;
+    box-shadow: 0 2px 8px #0001;
+  }
 
-      navigator.clipboard
-        .writeText(textToCopy)
-        .then(() => {
-          console.log("工数サマリーをクリップボードにコピーしました！");
-        })
-        .catch((err) => {
-          console.error("クリップボードへのコピーに失敗しました:", err);
-          alert("クリップボードへのコピーに失敗しました。");
-        });
-    }
-    function endWorks() {
-      document.getElementById("endwork-modal").style.display = "block";
-    }
-    function closeModal(modalId) {
-      document.getElementById(modalId).style.display = "none";
-    }
-  </script>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f7f7f7;
-      margin: 0;
-    }
+  #manHourForm {
+    font-size: 15px;
+  }
 
-    .container {
-      background: #fff;
-      padding: 24px;
-      border-radius: 8px;
-      max-width: 600px;
-      margin: auto;
-      box-shadow: 0 2px 8px #0001;
-    }
+  #project-labels div:nth-child(2) {
+    margin-left: 317px;
+  }
 
-    #manHourForm {
-      font-size: 15px;
-    }
+  #project-labels div:nth-child(3) {
+    margin-left: 5px;
+  }
 
-    #project-labels div:nth-child(2) {
-      margin-left: 317px;
-    }
-    #project-labels div:nth-child(3) {
-      margin-left: 5px;
-    }
-    #project-labels div:nth-child(4) {
-      margin-left: 10px;
-    }
+  #project-labels div:nth-child(4) {
+    margin-left: 10px;
+  }
 
-    label {
-      display: block;
-      margin-top: 8px;
-    }
+  label {
+    display: block;
+    margin-top: 8px;
+  }
 
-    input[type="text"],
-    input[type="time"] {
-      width: 95%;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 12px;
-    }
+  input[type="text"],
+  input[type="time"] {
+    width: 95%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 12px;
+  }
 
-    input[type="time"] {
-      width: 80%;
-      text-align: center;
-    }
+  input[type="time"] {
+    width: 80%;
+    text-align: center;
+  }
 
-    [type='time']::-webkit-calendar-picker-indicator {
-      display: none;
-    }
+  [type='time']::-webkit-calendar-picker-indicator {
+    display: none;
+  }
 
-    .project-row {
-      border-radius: 6px;
-      background: #fafbfc;
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
+  .project-row {
+    border-radius: 6px;
+    background: #fafbfc;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
 
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      flex: 0.7;
-      min-width: 0;
-    }
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    flex: 0.7;
+    min-width: 0;
+  }
 
-    .input-group:first-child {
-      flex: 4;
-    }
+  .input-group:first-child {
+    flex: 4;
+  }
 
-    .remove-btn {
-      position: static;
-      margin-left: 8px;
-      align-self: flex-start;
-      font-size: 10px;
-    }
+  .remove-btn {
+    position: static;
+    margin-left: 8px;
+    align-self: flex-start;
+    font-size: 10px;
+  }
 
-    .add-btn {
-      background: #28a745;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+  .add-btn {
+    background: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
 
-    .add-btn:hover {
-      background: #1e7e34;
-    }
+  .add-btn:hover {
+    background: #1e7e34;
+  }
 
-    .save-btn {
-      background: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
+  .save-btn {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
 
-    .save-btn:hover {
-      background: #0056b3;
-    }
+  .save-btn:hover {
+    background: #0056b3;
+  }
 
-    .end-btn {
-      background: #ff00e1;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.2s;
-      width: 100px;
-    }
+  .end-btn {
+    background: #ff00e1;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100px;
+  }
 
-    .end-btn:hover {
-      background: #bd02a7;
-    }
+  .end-btn:hover {
+    background: #bd02a7;
+  }
 
-    button[type="submit"] {
-      margin-top: 24px;
-      padding: 10px 24px;
-      background: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 15px;
-    }
+  button[type="submit"] {
+    margin-top: 24px;
+    padding: 10px 24px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 15px;
+  }
 
-    button[type="submit"]:hover {
-      background: #0056b3;
-    }
+  button[type="submit"]:hover {
+    background: #0056b3;
+  }
 
-    .result {
-      margin-top: 24px;
-      font-size: 15px;
-    }
+  .result {
+    margin-top: 24px;
+    font-size: 15px;
+  }
 
-    .result-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 8px;
-    }
+  .result-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+  }
 
-    .result-table th,
-    .result-table td {
-      border: 1px solid #ddd;
-      padding: 6px 8px;
-      text-align: left;
-    }
+  .result-table th,
+  .result-table td {
+    border: 1px solid #ddd;
+    padding: 6px 8px;
+    text-align: left;
+  }
 
-    .result-table th {
-      background: #f0f0f0;
-    }
+  .result-table th {
+    background: #f0f0f0;
+  }
 
-    #modal-pick-btn {
-      width: 100%;
-      height: 80px;
-      font-size: 15px;
-      padding: 24px 0;
-      border-radius: 12px;
-      background: #007bff;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      margin-top: 32px;
-      transition: background 0.2s;
+  #modal-pick-btn {
+    width: 100%;
+    height: 80px;
+    font-size: 15px;
+    padding: 24px 0;
+    border-radius: 12px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    margin-top: 32px;
+    transition: background 0.2s;
+  }
+
+  #modal-pick-btn:hover {
+    background: #0056b3;
+  }
+
+  /* 発光エフェクト */
+  .flash-effect {
+    animation: flash-glow 0.7s ease;
+  }
+
+  @keyframes flash-glow {
+    0% {
+      background: #eaffe6;
+      box-shadow: 0 0 0px #b3ffb6;
     }
 
-    #modal-pick-btn:hover {
-      background: #0056b3;
+    30% {
+      background: #eaffe6;
+      box-shadow: 0 0 30px 15px #b3ffb6;
     }
 
-    /* 発光エフェクト */
-    .flash-effect {
-      animation: flash-glow 0.7s ease;
+    70% {
+      background: #eaffe6;
+      box-shadow: 0 0 30px 15px #b3ffb6;
     }
 
-    @keyframes flash-glow {
-      0% {
-        background: #eaffe6;
-        box-shadow: 0 0 0px #b3ffb6;
-      }
-
-      30% {
-        background: #eaffe6;
-        box-shadow: 0 0 30px 15px #b3ffb6;
-      }
-
-      70% {
-        background: #eaffe6;
-        box-shadow: 0 0 30px 15px #b3ffb6;
-      }
-
-      100% {
-        background: none;
-        box-shadow: none;
-      }
+    100% {
+      background: none;
+      box-shadow: none;
     }
-  </style>
+  }
+</style>
+
 </html>
