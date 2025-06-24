@@ -92,11 +92,13 @@
           border-radius: 8px;
           padding: 100px 24px 50px;
           max-width: 600px;
-          margin: 120px auto 0 auto;
+          margin: 20px auto 0 auto;
           box-shadow: 0 2px 16px #0003;
           text-align: center;
+          overflow: scroll;
+          height: 800px;
         ">
-      <div style="width: 400px; margin:10px auto; background-color: #f5f5f5;">
+      <div style="background-color: #f5f5f5;">
         <div style="font-size: 20px; margin-bottom: 10px;">Redmine入力</div>
         <div id="redmine-table-container"></div>
         <button id="redmine-bulk-post-btn"
@@ -126,6 +128,8 @@
   let fileHandle = null;
   // Redmine設定グローバル
   let redmineConfig = { url: '', apiKey: '' };
+  // Redmineの作業分類(activity)一覧を取得し、グローバルに保持
+  let redmineActivities = [];
 
   function addProjectRow(project = "", start = "", end = "") {
     projectCount++;
@@ -569,26 +573,65 @@
   }
   // Redmine連携ボタンのイベントリスナー
   document.getElementById('redmine-bulk-post-btn').addEventListener('click', async function () {
-    const projectsDiv = document.getElementById("projects");
-    const rows = projectsDiv.getElementsByClassName("project-row");
-    const container = document.getElementById("redmine-table-container");
-    let html = '<table style="width:100%; font-size:13px; border-collapse:collapse;">';
-    html += '<tr><th style="border:1px solid #ccc;">チケット番号</th><th style="border:1px solid #ccc;">日付</th><th style="border:1px solid #ccc;">案件名</th><th style="border:1px solid #ccc;">工数</th><th style="border:1px solid #ccc;">コメント</th><th style="border:1px solid #ccc;">作業分類</th></tr>';
-    for (let row of rows) {
-      const project = row.querySelector('input[name="project"]').value;
-      const manhour = row.querySelector('.manhour-value').textContent.replace(' h', '');
-      if (!project || !manhour) continue;
-      html += `<tr>
-        <td style='border:1px solid #ccc;'><input type='text' class='redmine-issue-id' style='width:70px;'></td>
-        <td style='border:1px solid #ccc;'><input type='date' class='redmine-spent-on' value='${new Date().toISOString().slice(0, 10)}' style='width:110px;'></td>
-        <td style='border:1px solid #ccc;'><input type='text' class='redmine-project-name' value='${project}' style='width:100px;'></td>
-        <td style='border:1px solid #ccc;'><input type='number' class='redmine-hours' value='${manhour}' step='0.01' min='0' style='width:60px;'></td>
-        <td style='border:1px solid #ccc;'><input type='text' class='redmine-comment' value='${project}' style='width:120px;'></td>
-        <td style='border:1px solid #ccc;'><input type='text' class='redmine-activity-id' style='width:60px;'></td>
-      </tr>`;
+    if (!redmineConfig.url || !redmineConfig.apiKey) {
+      alert('RedmineのURLとAPIキーを設定してください。');
+      return;
     }
-    html += '</table>';
-    container.innerHTML = html;
+    const table = document.getElementById('redmine-table-container').querySelector('table');
+    if (!table) {
+      alert('Redmine入力テーブルがありません。');
+      return;
+    }
+    const rows = table.querySelectorAll('tr');
+    let successCount = 0;
+    let failCount = 0;
+    for (let i = 1; i < rows.length; i++) { // 1行目はヘッダ
+      const row = rows[i];
+      const issueId = row.querySelector('.redmine-issue-id')?.value.trim();
+      const spentOn = row.querySelector('.redmine-spent-on')?.value;
+      const projectName = row.querySelector('.redmine-project-name')?.value.trim();
+      const hours = row.querySelector('.redmine-hours')?.value.trim();
+      const comment = row.querySelector('.redmine-comment')?.value.trim();
+      const activityId = row.querySelector('.redmine-activity-id')?.value;
+
+      // 必須項目チェック
+      if (!issueId || !spentOn || !hours || !activityId) {
+        continue; // 必須項目がなければスキップ
+      }
+
+      const postData = {
+        time_entry: {
+          issue_id: Number(issueId),
+          spent_on: spentOn,
+          hours: Number(hours),
+          comments: comment || projectName || '',
+          activity_id: Number(activityId)
+        }
+      };
+
+      try {
+        const res = await fetch(`${redmineConfig.url.replace(/\/$/, '')}/time_entries.json`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Redmine-API-Key': redmineConfig.apiKey
+          },
+          body: JSON.stringify(postData)
+        });
+        if (res.ok) {
+          successCount++;
+          row.style.backgroundColor = '#eaffe6'; // 成功時に行を緑色に
+        } else {
+          failCount++;
+          row.style.backgroundColor = '#ffeaea'; // 失敗時に行を赤色に
+        }
+      } catch (e) {
+        failCount++;
+        row.style.backgroundColor = '#ffeaea';
+        console.error('Redmine登録エラー:', e);
+      }
+    }
+    alert(`Redmine登録完了\n成功: ${successCount}件\n失敗: ${failCount}件`);
   });
   // Redmine入力テーブルのチケット番号入力で案件名自動取得
   function enableRedmineIssueAutoFill() {
@@ -628,38 +671,67 @@
       });
     }
   }
-  // showRedmineTable: Redmine入力テーブルを生成
+  // 作業分類一覧をRedmineから取得
+  async function fetchRedmineActivities() {
+    if (!redmineConfig.url || !redmineConfig.apiKey) return;
+    try {
+      const res = await fetch(`${redmineConfig.url.replace(/\/$/, '')}/enumerations/time_entry_activities.json`, {
+        headers: { 'X-Redmine-API-Key': redmineConfig.apiKey }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.time_entry_activities) {
+          redmineActivities = data.time_entry_activities;
+        }
+      }
+    } catch (e) {
+      console.error('Redmine activities fetch error:', e);
+    }
+  }
+
+  // 作業分類プルダウンHTMLを生成
+  function getActivitySelectHtml(selectedId = '') {
+    let html = `<select class="redmine-activity-id" style="width: 100px;">`;
+    html += `<option value="">選択</option>`;
+    for (const act of redmineActivities) {
+      const sel = act.id == selectedId ? 'selected' : '';
+      html += `<option value="${act.id}" ${sel}>${act.name}</option>`;
+    }
+    html += `</select>`;
+    return html;
+  }
+
+  // showRedmineTable: Redmine入力テーブルを生成（作業分類をプルダウン化）
   function showRedmineTable() {
-    // #summary-block から案件名と工数を取得
     const summaryBlock = document.getElementById("summary-block");
     const container = document.getElementById("redmine-table-container");
     let html = '<table style="width:100%; font-size:13px; border-collapse:collapse;">';
-    html += '<tr><th style="border:1px solid #ccc;">チケット番号</th><th style="border:1px solid #ccc;">日付</th><th style="border:1px solid #ccc;">案件名</th><th style="border:1px solid #ccc;">工数</th><th style="border:1px solid #ccc;">コメント</th><th style="border:1px solid #ccc;">作業分類</th></tr>';
+    html += '<tr><th style="border:1px solid #ccc;">ﾁｹｯﾄNo</th><th style="border:1px solid #ccc;">日付</th><th style="border:1px solid #ccc;">案件名</th><th style="border:1px solid #ccc;">工数</th><th style="border:1px solid #ccc;">コメント</th><th style="border:1px solid #ccc;">作業分類</th></tr>';
 
-    // #summary-block の <li> から案件名と工数を抽出
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = summaryBlock.innerHTML;
     const lis = tempDiv.querySelectorAll('ul > li');
     for (let li of lis) {
-      // 案件名: <li>案件名<span>: </span><strong>工数</strong><span> h</span></li>
       const project = li.childNodes[0]?.textContent?.trim() || '';
       const manhour = li.querySelector('strong')?.textContent?.trim() || '';
       if (!project || !manhour) continue;
       html += `<tr>
-        <td style='border:1px solid #ccc;'><input type='text' class='redmine-issue-id' style='width:70px;'></td>
-        <td style='border:1px solid #ccc;'><input type='date' class='redmine-spent-on' value='${new Date().toISOString().slice(0, 10)}' style='width:110px;'></td>
-        <td style='border:1px solid #ccc;'><input readonly type='text' class='redmine-project-name' value='' style='width:100px;'></td>
-        <td style='border:1px solid #ccc;'><input type='number' class='redmine-hours' value='${manhour}' step='0.01' min='0' style='width:60px;'></td>
+        <td style='border:1px solid #ccc;'><input type='text' class='redmine-issue-id' style='width:35px;'></td>
+        <td style='border:1px solid #ccc;'><input type='date' class='redmine-spent-on' value='${new Date().toISOString().slice(0, 10)}' style='width:95px;'></td>
+        <td style='border:1px solid #ccc;'><input readonly type='text' class='redmine-project-name' value='' style='width:180px;'></td>
+        <td style='border:1px solid #ccc;'><input type='text' class='redmine-hours' value='${manhour}' step='0.01' min='0' style='width:25px;'></td>
         <td style='border:1px solid #ccc;'><input type='text' class='redmine-comment' value='${project}' style='width:120px;'></td>
-        <td style='border:1px solid #ccc;'><input type='text' class='redmine-activity-id' style='width:60px;'></td>
+        <td style='border:1px solid #ccc;'>${getActivitySelectHtml()}</td>
       </tr>`;
     }
     html += '</table>';
     container.innerHTML = html;
   }
-  // showRedmineTableの最後で自動補完有効化
+
+  // showRedmineTableの最後で自動補完有効化＆作業分類取得
   const origShowRedmineTable = showRedmineTable;
-  showRedmineTable = function () {
+  showRedmineTable = async function () {
+    await fetchRedmineActivities();
     origShowRedmineTable();
     setTimeout(enableRedmineIssueAutoFill, 0);
   }
