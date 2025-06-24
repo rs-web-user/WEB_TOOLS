@@ -604,6 +604,9 @@
         const issueId = issueInput.value.trim();
         if (!issueId || !redmineConfig.url || !redmineConfig.apiKey) return;
         projectNameInput.value = '取得中...';
+        console.log('Redmine URL:', redmineConfig.url);
+        console.log('API Key:', redmineConfig.apiKey);
+        console.log('Fetch URL:', `${redmineConfig.url.replace(/\/$/, '')}/issues/${issueId}.json`);
         try {
           const res = await fetch(`${redmineConfig.url.replace(/\/$/, '')}/issues/${issueId}.json`, {
             headers: { 'X-Redmine-API-Key': redmineConfig.apiKey }
@@ -618,7 +621,8 @@
           } else {
             projectNameInput.value = '';
           }
-        } catch {
+        } catch (e) {
+          console.error('Redmine fetch error:', e);
           projectNameInput.value = '';
         }
       });
@@ -626,19 +630,25 @@
   }
   // showRedmineTable: Redmine入力テーブルを生成
   function showRedmineTable() {
-    const projectsDiv = document.getElementById("projects");
-    const rows = projectsDiv.getElementsByClassName("project-row");
+    // #summary-block から案件名と工数を取得
+    const summaryBlock = document.getElementById("summary-block");
     const container = document.getElementById("redmine-table-container");
     let html = '<table style="width:100%; font-size:13px; border-collapse:collapse;">';
     html += '<tr><th style="border:1px solid #ccc;">チケット番号</th><th style="border:1px solid #ccc;">日付</th><th style="border:1px solid #ccc;">案件名</th><th style="border:1px solid #ccc;">工数</th><th style="border:1px solid #ccc;">コメント</th><th style="border:1px solid #ccc;">作業分類</th></tr>';
-    for (let row of rows) {
-      const project = row.querySelector('input[name="project"]').value;
-      const manhour = row.querySelector('.manhour-value').textContent.replace(' h', '');
+
+    // #summary-block の <li> から案件名と工数を抽出
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = summaryBlock.innerHTML;
+    const lis = tempDiv.querySelectorAll('ul > li');
+    for (let li of lis) {
+      // 案件名: <li>案件名<span>: </span><strong>工数</strong><span> h</span></li>
+      const project = li.childNodes[0]?.textContent?.trim() || '';
+      const manhour = li.querySelector('strong')?.textContent?.trim() || '';
       if (!project || !manhour) continue;
       html += `<tr>
         <td style='border:1px solid #ccc;'><input type='text' class='redmine-issue-id' style='width:70px;'></td>
         <td style='border:1px solid #ccc;'><input type='date' class='redmine-spent-on' value='${new Date().toISOString().slice(0, 10)}' style='width:110px;'></td>
-        <td style='border:1px solid #ccc;'><input type='text' class='redmine-project-name' value='${project}' style='width:100px;'></td>
+        <td style='border:1px solid #ccc;'><input readonly type='text' class='redmine-project-name' value='' style='width:100px;'></td>
         <td style='border:1px solid #ccc;'><input type='number' class='redmine-hours' value='${manhour}' step='0.01' min='0' style='width:60px;'></td>
         <td style='border:1px solid #ccc;'><input type='text' class='redmine-comment' value='${project}' style='width:120px;'></td>
         <td style='border:1px solid #ccc;'><input type='text' class='redmine-activity-id' style='width:60px;'></td>
