@@ -102,7 +102,7 @@
         <div style="font-size: 20px; margin-bottom: 10px;">Redmine入力</div>
         <div id="redmine-table-container"></div>
         <button id="redmine-bulk-post-btn"
-          style="background: #e74c3c; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; cursor: pointer; margin-top: 10px;">一括Redmine登録</button>
+          style="background: #e74c3c; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; cursor: pointer; margin-top: 10px;">一括Redmine工数登録</button>
       </div>
       <div style="width: 400px; margin:10px auto; background-color: #f5f5f5;">
         <div style="font-size: 20px; margin-bottom: 10px;">
@@ -364,7 +364,7 @@
       }
     }
   }
-  function updateSummaryBlock() {
+  function getSummaryHtml() {
     const projectsDiv = document.getElementById("projects");
     const rows = projectsDiv.getElementsByClassName("project-row");
     const summary = {};
@@ -399,10 +399,39 @@
     const totalTimeStr = `${totalHours}:${totalMinutes
       .toString()
       .padStart(2, "0")}`;
-    html += `<strong>合計工数: <span style="color:#007bff;">${total.toFixed(
+    html += `<strong id="total-manhour-block">合計工数: <span style=\"color:#007bff;\">${total.toFixed(
       2
-    )}</span> h （実時間:<span style="margin-left:12px; color:#007bff; font-size: 15px;">${totalTimeStr}</span>）</strong>`;
-    document.getElementById("summary-block").innerHTML = html;
+    )}</span> h （実時間:<span style=\"margin-left:12px; color:#007bff; font-size: 15px;\">${totalTimeStr}</span>）</strong>`;
+    return html;
+  }
+
+  // 合計工数部分だけ返す関数
+  function getTotalManHourHtml() {
+    const projectsDiv = document.getElementById("projects");
+    const rows = projectsDiv.getElementsByClassName("project-row");
+    let total = 0;
+    for (let row of rows) {
+      const project = row.querySelector('input[name="project"]').value.trim();
+      const start = row.querySelector('input[name="start"]').value;
+      const end = row.querySelector('input[name="end"]').value;
+      if (!project || !start || !end) continue;
+      const [startHour, startMin] = start.split(":").map(Number);
+      const [endHour, endMin] = end.split(":").map(Number);
+      let startTotal = startHour * 60 + startMin;
+      let endTotal = endHour * 60 + endMin;
+      if (endTotal < startTotal) endTotal += 24 * 60;
+      const diffMin = endTotal - startTotal;
+      const manHour = diffMin / 60;
+      total += manHour;
+    }
+    const totalHours = Math.floor(total);
+    const totalMinutes = Math.round((total - totalHours) * 60);
+    const totalTimeStr = `${totalHours}:${totalMinutes.toString().padStart(2, "0")}`;
+    return `<strong id="total-manhour-block">合計工数: <span style=\"color:#007bff;\">${total.toFixed(2)}</span> h （実時間:<span style=\"margin-left:12px; color:#007bff; font-size: 15px;\">${totalTimeStr}</span>）</strong>`;
+  }
+
+  function updateSummaryBlock() {
+    document.getElementById("summary-block").innerHTML = getSummaryHtml();
   }
 
   // 上書き保存
@@ -583,6 +612,32 @@
       return;
     }
     const rows = table.querySelectorAll('tr');
+    let hasInputError = false;
+    // まず全行の必須項目をチェック
+    for (let i = 1; i < rows.length; i++) { // 1行目はヘッダ
+      const row = rows[i];
+      const issueId = row.querySelector('.redmine-issue-id')?.value.trim();
+      const spentOn = row.querySelector('.redmine-spent-on')?.value;
+      const hours = row.querySelector('.redmine-hours')?.value.trim();
+      const activityId = row.querySelector('.redmine-activity-id')?.value;
+      const comment = row.querySelector('.redmine-comment')?.value.trim();
+      // .redmine-commentが"h"だけならこの行はチェック対象外
+      if (comment === 'h') {
+        row.style.backgroundColor = '';
+        continue;
+      }
+      if (!issueId || !spentOn || !hours || !activityId) {
+        hasInputError = true;
+        row.style.backgroundColor = '#ff0000'; // 入力不備の行を赤色に
+      } else {
+        row.style.backgroundColor = ''; // クリア
+      }
+    }
+    if (hasInputError) {
+      alert('必須項目が未入力の行があります。すべて入力してください。');
+      return; // 1件でも不備があれば登録処理を行わない
+    }
+    // ここから登録処理
     let successCount = 0;
     let failCount = 0;
     for (let i = 1; i < rows.length; i++) { // 1行目はヘッダ
@@ -593,12 +648,11 @@
       const hours = row.querySelector('.redmine-hours')?.value.trim();
       const comment = row.querySelector('.redmine-comment')?.value.trim();
       const activityId = row.querySelector('.redmine-activity-id')?.value;
-
-      // 必須項目チェック
-      if (!issueId || !spentOn || !hours || !activityId) {
-        continue; // 必須項目がなければスキップ
+      // .redmine-commentが"h"だけなら登録処理もスキップ
+      if (comment === 'h') {
+        row.style.backgroundColor = '';
+        continue;
       }
-
       const postData = {
         time_entry: {
           issue_id: Number(issueId),
@@ -608,7 +662,6 @@
           activity_id: Number(activityId)
         }
       };
-
       try {
         const res = await fetch(`${redmineConfig.url.replace(/\/$/, '')}/time_entries.json`, {
           method: 'POST',
@@ -620,14 +673,14 @@
         });
         if (res.ok) {
           successCount++;
-          row.style.backgroundColor = '#eaffe6'; // 成功時に行を緑色に
+          row.style.backgroundColor = '#61ff39'; // 成功時に行を緑色に
         } else {
           failCount++;
-          row.style.backgroundColor = '#ffeaea'; // 失敗時に行を赤色に
+          row.style.backgroundColor = '#ff0000'; // 失敗時に行を赤色に
         }
       } catch (e) {
         failCount++;
-        row.style.backgroundColor = '#ffeaea';
+        row.style.backgroundColor = '#ff0000';
         console.error('Redmine登録エラー:', e);
       }
     }
@@ -691,7 +744,7 @@
 
   // 作業分類プルダウンHTMLを生成
   function getActivitySelectHtml(selectedId = '') {
-    let html = `<select class="redmine-activity-id" style="width: 100px;">`;
+    let html = `<select class="redmine-activity-id">`;
     html += `<option value="">選択</option>`;
     for (const act of redmineActivities) {
       const sel = act.id == selectedId ? 'selected' : '';
@@ -705,27 +758,46 @@
   function showRedmineTable() {
     const summaryBlock = document.getElementById("summary-block");
     const container = document.getElementById("redmine-table-container");
-    let html = '<table style="font-size:13px; border-collapse:collapse;">';
-    html += '<tr><th style="border:1px solid #ccc;">ﾁｹｯﾄNo</th><th style="border:1px solid #ccc;">日付</th><th style="border:1px solid #ccc;">案件名</th><th style="border:1px solid #ccc;">工数</th><th style="border:1px solid #ccc;">コメント</th><th style="border:1px solid #ccc;">作業分類</th></tr>';
+    let html = '<table style="background-color:white; margin:auto; font-size:13px; border-collapse:collapse;">';
+    html += '<tr style="background-color:#aaa;"><th style="border:1px solid #ccc;">No</th><th style="border:1px solid #ccc;">ﾁｹｯﾄNo</th><th style="border:1px solid #ccc;">日付</th><th style="border:1px solid #ccc;">案件名</th><th style="border:1px solid #ccc;">工数</th><th style="border:1px solid #ccc;">コメント</th><th style="border:1px solid #ccc;">作業分類</th></tr>';
 
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = summaryBlock.innerHTML;
     const lis = tempDiv.querySelectorAll('ul > li');
+    let rowNum = 1;
     for (let li of lis) {
       const project = li.childNodes[0]?.textContent?.trim() || '';
       const manhour = li.querySelector('strong')?.textContent?.trim() || '';
       if (!project || !manhour) continue;
       html += `<tr>
+        <td style='border:1px solid #ccc; text-align:center;'>${rowNum}</td>
         <td style='border:1px solid #ccc;'><input type='text' class='redmine-issue-id'></td>
-        <td style='border:1px solid #ccc;'><input type='date' class='redmine-spent-on' value='${new Date().toISOString().slice(0, 10)}'></td>
-        <td style='border:1px solid #ccc;'><input readonly type='text' class='redmine-project-name' style='width:500px;'></td>
+        <td style='border:1px solid #ccc;'><input type='date' class='redmine-spent-on' value='${new Date().toISOString().slice(0, 10)}' style='min-width:95px'></td>
+        <td style='border:1px solid #ccc;'><input readonly type='text' class='redmine-project-name'></td>
         <td style='border:1px solid #ccc;'><input type='text' class='redmine-hours' value='${manhour}' step='0.01' min='0'></td>
-        <td style='border:1px solid #ccc;'><input type='text' class='redmine-comment' value='${project}' style='width:500px;'></td>
+        <td style='border:1px solid #ccc;'><input type='text' class='redmine-comment' value='${project}'></td>
         <td style='border:1px solid #ccc;'>${getActivitySelectHtml()}</td>
       </tr>`;
+      rowNum++;
     }
     html += '</table>';
     container.innerHTML = html;
+    // 合計工数だけをボタンの直上に挿入
+    setTimeout(() => {
+      const btn = document.getElementById('redmine-bulk-post-btn');
+      if (btn) {
+        let sumBlock = document.getElementById('total-manhour-block-redmine');
+        if (!sumBlock) {
+          sumBlock = document.createElement('div');
+          sumBlock.id = 'total-manhour-block-redmine';
+          sumBlock.style.margin = '10px auto 10px auto';
+          sumBlock.style.maxWidth = '600px';
+          sumBlock.style.fontSize = '15px';
+          btn.parentNode.insertBefore(sumBlock, btn);
+        }
+        sumBlock.innerHTML = getTotalManHourHtml();
+      }
+    }, 0);
   }
 
   // showRedmineTableの最後で自動補完有効化＆作業分類取得
@@ -734,6 +806,42 @@
     await fetchRedmineActivities();
     origShowRedmineTable();
     setTimeout(enableRedmineIssueAutoFill, 0);
+    // ▼▼▼ 入力幅自動調整イベント付与 ▼▼▼
+    setTimeout(() => {
+      enableAutoInputWidth('#redmine-table-container input[type="text"], #redmine-table-container input[type="date"], #redmine-table-container input[type="number"]');
+    }, 0);
+  }
+
+  // 入力値に合わせてinputの幅を自動調整する関数
+  function enableAutoInputWidth(selector) {
+    // 幅計算用のspanをbodyに1つだけ用意
+    let measurer = document.getElementById('input-width-measurer');
+    if (!measurer) {
+      measurer = document.createElement('span');
+      measurer.id = 'input-width-measurer';
+      measurer.style.visibility = 'hidden';
+      measurer.style.position = 'absolute';
+      measurer.style.whiteSpace = 'pre';
+      measurer.style.fontSize = '13px';
+      measurer.style.fontFamily = 'inherit';
+      document.body.appendChild(measurer);
+    }
+    const inputs = document.querySelectorAll(selector);
+    inputs.forEach(input => {
+      // 初期幅調整
+      autoResizeInputWidth(input, measurer);
+      // 入力イベントで幅調整
+      input.addEventListener('input', () => autoResizeInputWidth(input, measurer));
+      // フォントサイズ変更や初期値にも対応
+      input.addEventListener('change', () => autoResizeInputWidth(input, measurer));
+    });
+  }
+  function autoResizeInputWidth(input, measurer) {
+    measurer.style.fontSize = window.getComputedStyle(input).fontSize;
+    measurer.style.fontFamily = window.getComputedStyle(input).fontFamily;
+    measurer.textContent = input.value || input.placeholder || '';
+    // 余白分+12px
+    input.style.width = Math.max(40, measurer.offsetWidth + 12) + 'px';
   }
 </script>
 <style>
@@ -935,6 +1043,15 @@
       background: none;
       box-shadow: none;
     }
+  }
+
+  #redmine-table-container input[type="text"],
+  #redmine-table-container input[type="date"],
+  #redmine-table-container input[type="number"] {
+    min-width: 40px;
+    width: auto;
+    transition: width 0.15s;
+    box-sizing: content-box;
   }
 </style>
 
