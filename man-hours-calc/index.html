@@ -711,15 +711,34 @@
             const data = await res.json();
             if (data.issue && data.issue.subject) {
               projectNameInput.value = data.issue.subject;
+              // ▼▼▼ 入力幅自動調整 ▼▼▼
+              let measurer = document.getElementById('input-width-measurer');
+              if (!measurer) {
+                measurer = document.createElement('span');
+                measurer.id = 'input-width-measurer';
+                measurer.style.visibility = 'hidden';
+                measurer.style.position = 'absolute';
+                measurer.style.whiteSpace = 'pre';
+                measurer.style.fontSize = '13px';
+                measurer.style.fontFamily = 'inherit';
+                document.body.appendChild(measurer);
+              }
+              autoResizeInputWidth(projectNameInput, measurer);
             } else {
               projectNameInput.value = '';
+              let measurer = document.getElementById('input-width-measurer');
+              if (measurer) autoResizeInputWidth(projectNameInput, measurer);
             }
           } else {
             projectNameInput.value = '';
+            let measurer = document.getElementById('input-width-measurer');
+            if (measurer) autoResizeInputWidth(projectNameInput, measurer);
           }
         } catch (e) {
           console.error('Redmine fetch error:', e);
           projectNameInput.value = '';
+          let measurer = document.getElementById('input-width-measurer');
+          if (measurer) autoResizeInputWidth(projectNameInput, measurer);
         }
       });
     }
