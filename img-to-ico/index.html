@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>画像をICOに変換</title>
+</head>
+
+<body>
+    <div class="container">
+        <h2>画像をICOに変換</h2>
+        <input type="file" id="imgInput" accept="image/*">
+        <label for="sizeSelect">サイズを選択:</label>
+        <select id="sizeSelect">
+            <option value="16">16x16</option>
+            <option value="32">32x32</option>
+            <option value="48">48x48</option>
+            <option value="64" selected>64x64(デフォルト)</option>
+            <option value="128">128x128</option>
+            <option value="256">256x256</option>
+        </select>
+        <button id="convertBtn">ICOに変換</button>
+        <div id="preview"></div>
+        <a id="downloadLink" style="display:none;" download="icon.ico">ICOをダウンロード</a>
+    </div>
+    <script>
+        const imgInput = document.getElementById('imgInput');
+        const sizeSelect = document.getElementById('sizeSelect');
+        const convertBtn = document.getElementById('convertBtn');
+        const preview = document.getElementById('preview');
+        const downloadLink = document.getElementById('downloadLink');
+        let imgData = null;
+
+        imgInput.addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                imgData = ev.target.result;
+                preview.innerHTML = `<img src="${imgData}" alt="preview">`;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        convertBtn.addEventListener('click', async () => {
+            if (!imgData) {
+                alert('画像を選択してください');
+                return;
+            }
+            const size = parseInt(sizeSelect.value, 10);
+            const icoBlob = await createIco(imgData, size);
+            if (icoBlob) {
+                const url = URL.createObjectURL(icoBlob);
+                downloadLink.href = url;
+                downloadLink.style.display = 'block';
+                downloadLink.textContent = 'ICOをダウンロード';
+            } else {
+                alert('ICO変換に失敗しました');
+            }
+        });
+
+        // PNG画像を指定サイズでICOに変換
+        async function createIco(dataUrl, size) {
+            return new Promise(resolve => {
+                const img = new window.Image();
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, size, size);
+                    ctx.drawImage(img, 0, 0, size, size);
+                    canvas.toBlob(blob => {
+                        const reader = new FileReader();
+                        reader.onloadend = function () {
+                            const pngData = new Uint8Array(reader.result);
+                            const icoData = buildIco([pngData], size);
+                            resolve(new Blob([icoData], { type: 'image/x-icon' }));
+                        };
+                        reader.readAsArrayBuffer(blob);
+                    }, 'image/png');
+                };
+                img.onerror = () => resolve(null);
+                img.src = dataUrl;
+            });
+        }
+
+        // PNGバイナリからICOバイナリを生成
+        function buildIco(pngArr, size) {
+            // ヘッダ(ICONDIR)
+            const num = pngArr.length;
+            const header = new Uint8Array(6);
+            header[0] = 0; header[1] = 0; // reserved
+            header[2] = 1; header[3] = 0; // type: icon
+            header[4] = num; header[5] = 0; // count
+            // ディレクトリエントリ(ICONDIRENTRY)
+            const entries = new Uint8Array(16 * num);
+            let offset = 6 + 16 * num;
+            let pngSizes = [];
+            for (let i = 0; i < num; i++) {
+                const png = pngArr[i];
+                entries[i * 16 + 0] = size === 256 ? 0 : size; // width
+                entries[i * 16 + 1] = size === 256 ? 0 : size; // height
+                entries[i * 16 + 2] = 0; // color count
+                entries[i * 16 + 3] = 0; // reserved
+                entries[i * 16 + 4] = 1; entries[i * 16 + 5] = 0; // planes
+                entries[i * 16 + 6] = 32; entries[i * 16 + 7] = 0; // bit count
+                entries[i * 16 + 8] = png.length & 0xFF;
+                entries[i * 16 + 9] = (png.length >> 8) & 0xFF;
+                entries[i * 16 + 10] = (png.length >> 16) & 0xFF;
+                entries[i * 16 + 11] = (png.length >> 24) & 0xFF;
+                entries[i * 16 + 12] = offset & 0xFF;
+                entries[i * 16 + 13] = (offset >> 8) & 0xFF;
+                entries[i * 16 + 14] = (offset >> 16) & 0xFF;
+                entries[i * 16 + 15] = (offset >> 24) & 0xFF;
+                offset += png.length;
+                pngSizes.push(png.length);
+            }
+            // PNGデータ本体
+            let totalSize = header.length + entries.length + pngSizes.reduce((a, b) => a + b, 0);
+            const ico = new Uint8Array(totalSize);
+            ico.set(header, 0);
+            ico.set(entries, header.length);
+            let dataOffset = header.length + entries.length;
+            for (let i = 0; i < num; i++) {
+                ico.set(pngArr[i], dataOffset);
+                dataOffset += pngArr[i].length;
+            }
+            return ico;
+        }
+    </script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 2em;
+            background: #181a1b;
+            color: #e0e0e0;
+        }
+
+        .container {
+            background: #23272a;
+            padding: 2em;
+            border-radius: 8px;
+            box-shadow: 0 2px 16px #0008;
+            max-width: 400px;
+            margin: auto;
+        }
+
+        input,
+        select,
+        button {
+            margin: 1em 0;
+            width: 100%;
+            padding: 0.5em;
+            background: #2c2f33;
+            color: #e0e0e0;
+            border: 1px solid #444;
+            border-radius: 4px;
+        }
+
+        input[type="file"] {
+            background: #23272a;
+        }
+
+        button {
+            background: #7289da;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #5b6eae;
+        }
+
+        img {
+            max-width: 100px;
+            max-height: 100px;
+            display: block;
+            margin: 1em auto;
+            background: #23272a;
+            border-radius: 4px;
+            box-shadow: 0 1px 4px #0006;
+        }
+
+        a#downloadLink {
+            display: block;
+            margin: 1em auto;
+            text-align: center;
+            background: #43b581;
+            color: #fff;
+            padding: 0.7em 0;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        a#downloadLink:hover {
+            background: #357a5b;
+        }
+    </style>
+
+</html>
