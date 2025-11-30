@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>title</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Meiryo', sans-serif;
+            background: #f7fafc;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            margin-top: 40px;
+            padding: 32px 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            max-width: 350px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5em;
+            margin-bottom: 16px;
+            color: #2d3748;
+        }
+
+        .menu-title {
+            font-size: 1.2em;
+            margin: 24px 0 12px 0;
+            color: #3182ce;
+        }
+
+        .counter {
+            font-size: 2.5em;
+            margin: 16px 0;
+            color: #e53e3e;
+        }
+
+        .btn {
+            background: #3182ce;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn:active {
+            background: #225ea8;
+        }
+
+        .progress {
+            margin: 20px 0 10px 0;
+            color: #4a5568;
+            font-size: 0.95em;
+        }
+
+        .done {
+            color: #38a169;
+            font-size: 1.2em;
+            margin-top: 24px;
+        }
+
+        .btn-skip {
+            background: #a0aec0;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 4px 12px;
+            font-size: 0.8em;
+            margin: 0 0 8px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-skip:active {
+            background: #718096;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>ダイエットサポートアプリ</h1>
+        <div class="progress" id="progress"></div>
+        <button id="skipBtn" class="btn btn-skip"
+            style="font-size:0.8em; padding:4px 12px; margin-bottom:8px;">メニューをスキップ</button>
+        <div class="menu-title" id="menuTitle"></div>
+        <div class="counter" id="counter"></div>
+        <div id="controls"></div>
+        <div class="done" id="doneMsg" style="display:none;">お疲れさまでした！</div>
+    </div>
+    <script>
+        // メニュー定義
+        const menus = [
+            { type: 'timer', label: '踏み台昇降', duration: 300 },
+            { type: 'count', label: 'スクワット', count: 10 },
+            { type: 'count', label: 'スクワット', count: 10 },
+            { type: 'count', label: 'スクワット', count: 10 },
+            { type: 'timer', label: 'プランク', duration: 30 },
+            { type: 'timer', label: 'プランク', duration: 30 },
+            { type: 'timer', label: 'プランク', duration: 30 },
+            { type: 'timer', label: '踏み台昇降', duration: 600 },
+        ];
+
+        let current = 0;
+        let timer = null;
+        let remaining = 0;
+        let count = 0;
+
+        const menuTitle = document.getElementById('menuTitle');
+        const counter = document.getElementById('counter');
+        const controls = document.getElementById('controls');
+        const progress = document.getElementById('progress');
+        const doneMsg = document.getElementById('doneMsg');
+        const skipBtn = document.getElementById('skipBtn');
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return m > 0 ? `${m}:${s.toString().padStart(2, '0')}` : `${s}`;
+        }
+
+        function playBeep() {
+            // 4音の高低を交互にした通知音
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const gain = ctx.createGain();
+            gain.gain.value = 0.18;
+            gain.connect(ctx.destination);
+            const freqs = [1400, 1800, 1200, 2000];
+            const duration = 0.09;
+            freqs.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                osc.type = 'triangle';
+                osc.frequency.value = freq;
+                osc.connect(gain);
+                osc.start(ctx.currentTime + i * duration);
+                osc.stop(ctx.currentTime + (i + 1) * duration);
+                if (i === freqs.length - 1) {
+                    osc.onended = () => ctx.close();
+                }
+            });
+        }
+
+        function showMenu(idx) {
+            playBeep();
+            if (idx >= menus.length) {
+                menuTitle.style.display = 'none';
+                counter.style.display = 'none';
+                controls.style.display = 'none';
+                progress.style.display = 'none';
+                skipBtn.style.display = 'none';
+                doneMsg.style.display = '';
+                return;
+            }
+            doneMsg.style.display = 'none';
+            menuTitle.style.display = '';
+            counter.style.display = '';
+            controls.style.display = '';
+            progress.style.display = '';
+            skipBtn.style.display = '';
+            progress.textContent = `メニュー ${idx + 1} / ${menus.length}`;
+            const menu = menus[idx];
+            menuTitle.textContent = menu.label + (menu.type === 'timer' ? `（${menu.duration >= 60 ? Math.floor(menu.duration / 60) + '分' : menu.duration + '秒'}）` : `（${menu.count}回）`);
+            controls.innerHTML = '';
+            if (menu.type === 'timer') {
+                remaining = menu.duration;
+                counter.textContent = formatTime(remaining);
+                const btn = document.createElement('button');
+                btn.textContent = 'スタート';
+                btn.className = 'btn';
+                btn.onclick = startTimer;
+                controls.appendChild(btn);
+            } else if (menu.type === 'count') {
+                count = 0;
+                counter.textContent = `${count} / ${menu.count}`;
+                const btn = document.createElement('button');
+                btn.textContent = 'カウント +1';
+                btn.className = 'btn';
+                btn.onclick = () => {
+                    count++;
+                    counter.textContent = `${count} / ${menu.count}`;
+                    if (count >= menu.count) {
+                        nextMenu();
+                    }
+                };
+                controls.appendChild(btn);
+            }
+        }
+
+        function startTimer() {
+            controls.innerHTML = '';
+            timer = setInterval(() => {
+                remaining--;
+                counter.textContent = formatTime(remaining);
+                if (remaining <= 0) {
+                    clearInterval(timer);
+                    nextMenu();
+                }
+            }, 1000);
+        }
+
+        function nextMenu() {
+            clearInterval(timer);
+            current++;
+            showMenu(current);
+        }
+
+        skipBtn.onclick = nextMenu;
+
+        showMenu(current);
+    </script>
+</body>
+
+</html>

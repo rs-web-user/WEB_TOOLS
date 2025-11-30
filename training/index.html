@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>title</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Meiryo', sans-serif;
+            background: #f7fafc;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            margin-top: 40px;
+            padding: 32px 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            max-width: 350px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5em;
+            margin-bottom: 16px;
+            color: #2d3748;
+        }
+
+        .menus {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .menu-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .menu {
+            background: #f4f4f4;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            padding: 16px 12px;
+            transition: box-shadow 0.2s;
+        }
+
+        .menu-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            color: #2d3748;
+            text-align: left;
+        }
+
+        .menu-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .menu-list li {
+            background: #fff;
+            margin-bottom: 6px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+            font-size: 0.98em;
+            color: #444;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .menu-list li:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>メニュー選択</h1>
+        <div class="menus">
+            <a class="menu-link" href="./menu1.html">
+                <div class="menu">
+                    <div class="menu-title">Easy</div>
+                    <ul class="menu-list">
+                        <li>踏み台5分</li>
+                        <li>スクワット10回</li>
+                        <li>スクワット10回</li>
+                        <li>スクワット10回</li>
+                        <li>プランク30秒</li>
+                        <li>プランク30秒</li>
+                        <li>プランク30秒</li>
+                        <li>踏み台10分</li>
+                    </ul>
+                </div>
+            </a>
+            <a class="menu-link" href="./menu2.html">
+                <div class="menu">
+                    <div class="menu-title">Medium</div>
+                    <ul class="menu-list">
+                        <li>プランク30秒</li>
+                        <li>プランク30秒</li>
+                        <li>腹筋10回</li>
+                        <li>プランク30秒</li>
+                        <li>スクワット10回</li>
+                        <li>スクワット10回</li>
+                        <li>腹筋10回</li>
+                        <li>スクワット10回</li>
+                        <li>踏み台15分</li>
+                        <li>踏み台15分</li>
+                    </ul>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="container">
+        <h1>食材リスト</h1>
+        <div>
+            <ul class="menu-list">
+                <li>野菜</li>
+                <li>トマト</li>
+                <li>バナナ</li>
+                <li>豆腐</li>
+                <li>納豆</li>
+                <li>鶏むね肉</li>
+                <li>鯖缶</li>
+                <li>卵</li>
+                <li>プロテイン</li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>
