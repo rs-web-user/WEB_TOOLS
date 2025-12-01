@@ -203,14 +203,41 @@
 
         function startTimer() {
             controls.innerHTML = '';
+            let paused = false;
+            // 一時停止ボタン
+            const pauseBtn = document.createElement('button');
+            pauseBtn.textContent = '一時停止';
+            pauseBtn.className = 'btn';
+            controls.appendChild(pauseBtn);
+
+            // 再開ボタン
+            const resumeBtn = document.createElement('button');
+            resumeBtn.textContent = '再開';
+            resumeBtn.className = 'btn';
+            resumeBtn.style.display = 'none';
+            controls.appendChild(resumeBtn);
+
             timer = setInterval(() => {
-                remaining--;
-                counter.textContent = formatTime(remaining);
-                if (remaining <= 0) {
-                    clearInterval(timer);
-                    nextMenu();
+                if (!paused) {
+                    remaining--;
+                    counter.textContent = formatTime(remaining);
+                    if (remaining <= 0) {
+                        clearInterval(timer);
+                        nextMenu();
+                    }
                 }
             }, 1000);
+
+            pauseBtn.onclick = () => {
+                paused = true;
+                pauseBtn.style.display = 'none';
+                resumeBtn.style.display = '';
+            };
+            resumeBtn.onclick = () => {
+                paused = false;
+                pauseBtn.style.display = '';
+                resumeBtn.style.display = 'none';
+            };
         }
 
         function nextMenu() {
