@@ -182,6 +182,11 @@
 
         function showMenu(idx) {
             playBeep();
+            const container = document.querySelector('.container');
+            // 最後のメニューの時に背景色を変更
+            if (idx === menus.length - 1) {
+                container.style.background = 'rgb(16 255 0 / 30%)';
+            }
             if (idx >= menus.length) {
                 menuTitle.style.display = 'none';
                 counter.style.display = 'none';
